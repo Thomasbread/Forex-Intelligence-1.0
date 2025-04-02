@@ -97,6 +97,7 @@ def analyze_market(pair, data, sentiment):
     """
     Analyze market data and generate a trading signal if conditions are met.
     Advanced version with higher accuracy requirements and more confirmations.
+    Berücksichtigt Support/Resistance Levels, News und weitere Faktoren.
     
     Args:
         pair (str): Currency pair
@@ -120,11 +121,11 @@ def analyze_market(pair, data, sentiment):
     current_price = latest['Close']
     
     # Determine if market conditions are suitable for a trade
-    # Much more selective now - only 30% of potential signals will be considered
+    # Much more selective now - only 40% of potential signals will be considered
     signal_probability = random.uniform(0, 1)
     
     # Only proceed if the random filter passes (more selective)
-    if signal_probability > 0.7:  
+    if signal_probability > 0.6:  
         # Initialize all signal components
         signal_components = {
             'macd': 0,
@@ -134,7 +135,12 @@ def analyze_market(pair, data, sentiment):
             'volume': 0,
             'bollinger': 0,
             'price_action': 0,
-            'sentiment': 0
+            'sentiment': 0,
+            'support_resistance': 0,  # Neue Komponente: Support/Resistance
+            'news_impact': 0,         # Neue Komponente: News-Einfluss
+            'economic_factors': 0,    # Neue Komponente: Wirtschaftliche Faktoren
+            'seasonal_patterns': 0,   # Neue Komponente: Saisonalität
+            'key_level_break': 0      # Neue Komponente: Ausbruch aus wichtigen Levels
         }
         
         # 1. MACD Signal (stronger confirmation required)
@@ -315,6 +321,143 @@ def analyze_market(pair, data, sentiment):
         elif bear_probability > 0.6:
             signal_components['sentiment'] = -1
             
+        # 8. Support/Resistance Analysis
+        try:
+            # Prüfe, ob die Indikatoren in den Daten vorhanden sind
+            has_support_data = 'Support' in latest.index and 'Resistance' in latest.index
+            has_pivot_data = 'Pivot' in latest.index and 'R1' in latest.index and 'S1' in latest.index
+            has_fib_data = 'Fib_50.0' in latest.index
+            
+            if has_support_data:
+                # Prüfe auf Unterstützung/Widerstand an aktuellem Preis
+                is_support = latest.loc['Support'] == 1
+                is_resistance = latest.loc['Resistance'] == 1
+                
+                # Preis ist nahe an wichtigen Levels
+                if is_support:
+                    # Unterstützung kann zu Bounces führen (gut für Kaufsignale)
+                    signal_components['support_resistance'] += 1.5
+                if is_resistance:
+                    # Widerstand kann zu Abprallern führen (gut für Verkaufssignale)
+                    signal_components['support_resistance'] -= 1.5
+            
+            if has_pivot_data:
+                # Pivotpunkte - starke technische Levels
+                pivot = latest.loc['Pivot'].item() if hasattr(latest.loc['Pivot'], 'item') else latest.loc['Pivot']
+                r1 = latest.loc['R1'].item() if hasattr(latest.loc['R1'], 'item') else latest.loc['R1']
+                s1 = latest.loc['S1'].item() if hasattr(latest.loc['S1'], 'item') else latest.loc['S1']
+                
+                # Berechne prozentualen Abstand zum aktuellen Preis
+                pivot_dist = abs(current_price - pivot) / current_price * 100
+                r1_dist = abs(current_price - r1) / current_price * 100
+                s1_dist = abs(current_price - s1) / current_price * 100
+                
+                # Preis in der Nähe von wichtigen Levels
+                if pivot_dist < 0.1:  # Innerhalb von 0.1% vom Pivot
+                    # Entscheidungspunkt: Ausrichtung hängt von vorherigem Trend ab
+                    if latest_sma20 > latest_sma50:  # Aufwärtstrend
+                        signal_components['support_resistance'] += 1.0
+                    else:
+                        signal_components['support_resistance'] -= 1.0
+                        
+                if r1_dist < 0.1:  # Nahe am Widerstand R1
+                    if current_price > r1:  # Ausbruch über Widerstand
+                        signal_components['key_level_break'] += 2.0  # Stark bullisch
+                    else:
+                        signal_components['support_resistance'] -= 1.5  # Wahrscheinlicher Rückgang
+                        
+                if s1_dist < 0.1:  # Nahe an der Unterstützung S1
+                    if current_price < s1:  # Ausbruch unter Unterstützung
+                        signal_components['key_level_break'] -= 2.0  # Stark bearish
+                    else:
+                        signal_components['support_resistance'] += 1.5  # Wahrscheinliche Erholung
+            
+            if has_fib_data:
+                # Fibonacci-Levels sind wichtige Umkehrpunkte
+                fib_382 = latest.loc['Fib_38.2'].item() if hasattr(latest.loc['Fib_38.2'], 'item') else latest.loc['Fib_38.2']
+                fib_500 = latest.loc['Fib_50.0'].item() if hasattr(latest.loc['Fib_50.0'], 'item') else latest.loc['Fib_50.0']
+                fib_618 = latest.loc['Fib_61.8'].item() if hasattr(latest.loc['Fib_61.8'], 'item') else latest.loc['Fib_61.8']
+                
+                # Berechne prozentualen Abstand
+                fib_382_dist = abs(current_price - fib_382) / current_price * 100
+                fib_500_dist = abs(current_price - fib_500) / current_price * 100
+                fib_618_dist = abs(current_price - fib_618) / current_price * 100
+                
+                # Preis an Fibonacci-Levels
+                if fib_382_dist < 0.1:
+                    signal_components['support_resistance'] += 1.0 if current_price > fib_382 else -1.0
+                if fib_500_dist < 0.1:
+                    signal_components['support_resistance'] += 1.5 if current_price > fib_500 else -1.5
+                if fib_618_dist < 0.1:
+                    signal_components['support_resistance'] += 2.0 if current_price > fib_618 else -2.0
+                    
+        except Exception as e:
+            print(f"Error calculating support/resistance signals: {e}")
+            
+        # 9. News-Einfluss und wirtschaftliche Faktoren
+        try:
+            # Extrahiere Nachrichteninformationen aus dem Sentiment-Objekt
+            base_news = sentiment.get('base_currency_news', {})
+            quote_news = sentiment.get('quote_currency_news', {})
+            
+            # Analyse des News-Impacts
+            if 'impact' in base_news and 'sentiment' in base_news:
+                # Basiswährungseffekt - positiver Impact ist bullish für das Paar
+                if base_news['sentiment'] == 'bullish':
+                    signal_components['news_impact'] += base_news['impact'] * 2
+                elif base_news['sentiment'] == 'bearish':
+                    signal_components['news_impact'] -= base_news['impact'] * 2
+            
+            if 'impact' in quote_news and 'sentiment' in quote_news:
+                # Notierungswährungseffekt - positiver Impact ist bearish für das Paar
+                if quote_news['sentiment'] == 'bullish':
+                    signal_components['news_impact'] -= quote_news['impact'] * 2
+                elif quote_news['sentiment'] == 'bearish':
+                    signal_components['news_impact'] += quote_news['impact'] * 2
+            
+            # Wirtschaftliche Faktoren
+            interest_rate_diff = sentiment.get('interest_rate_diff', 0)
+            economic_outlook = sentiment.get('economic_outlook', 'neutral')
+            
+            # Zinsdifferenzen sind starke Preistreiber im Forex
+            signal_components['economic_factors'] += interest_rate_diff * 1.5
+            
+            # Wirtschaftlicher Ausblick
+            if economic_outlook == 'positiv':
+                signal_components['economic_factors'] += 1.0
+            elif economic_outlook == 'negativ':
+                signal_components['economic_factors'] -= 1.0
+                
+            # Globale Risikostimmung
+            risk_sentiment = sentiment.get('risk_sentiment', 'neutral')
+            if risk_sentiment == 'Risk-On':
+                # Risk-On ist gut für riskantere Währungen (AUD, NZD, CAD, EUR)
+                if any(curr in pair[:3] for curr in ['AUD', 'NZD', 'CAD', 'EUR']):
+                    signal_components['economic_factors'] += 0.5
+                # Risk-On ist schlecht für sichere Häfen (USD, JPY, CHF)
+                if any(curr in pair[:3] for curr in ['USD', 'JPY', 'CHF']):
+                    signal_components['economic_factors'] -= 0.5
+            elif risk_sentiment == 'Risk-Off':
+                # Risk-Off ist schlecht für riskantere Währungen
+                if any(curr in pair[:3] for curr in ['AUD', 'NZD', 'CAD', 'EUR']):
+                    signal_components['economic_factors'] -= 0.5
+                # Risk-Off ist gut für sichere Häfen
+                if any(curr in pair[:3] for curr in ['USD', 'JPY', 'CHF']):
+                    signal_components['economic_factors'] += 0.5
+                    
+        except Exception as e:
+            print(f"Error calculating news/economic signals: {e}")
+            
+        # 10. Saisonale Muster
+        try:
+            seasonal_bias = sentiment.get('seasonal_bias', 0)
+            
+            # Saisonaler Bias direkt verwenden
+            signal_components['seasonal_patterns'] = seasonal_bias * 2.0  # Verstärken des Effekts
+            
+        except Exception as e:
+            print(f"Error calculating seasonal patterns: {e}")
+            
         # Volatility adjustment - high volatility increases risk
         if volatility > 0.6:  # High volatility
             for key in signal_components:
@@ -325,14 +468,19 @@ def analyze_market(pair, data, sentiment):
         # Calculate overall signal with weighted components
         # MACD and MA crossovers have higher weight as they're trend indicators
         component_weights = {
-            'macd': 1.5,
-            'rsi': 1.2,
-            'ma_cross': 1.5,
-            'ma_trend': 1.0,
-            'volume': 0.8,
-            'bollinger': 1.2,
-            'price_action': 1.3,
-            'sentiment': 1.0
+            'macd': 1.2,                  # Etwas reduziert, da mehr Faktoren einfließen
+            'rsi': 1.0,                   # Leicht reduziert
+            'ma_cross': 1.2,              # Leicht reduziert 
+            'ma_trend': 0.8,              # Leicht reduziert
+            'volume': 0.6,                # Reduziert
+            'bollinger': 1.0,             # Leicht reduziert
+            'price_action': 1.0,          # Leicht reduziert
+            'sentiment': 1.0,             # Unverändert
+            'support_resistance': 1.8,    # Neu: hohe Gewichtung für Support/Resistance
+            'news_impact': 1.5,           # Neu: hohe Gewichtung für Newseinfluss
+            'economic_factors': 1.5,      # Neu: hohe Gewichtung für wirtschaftliche Faktoren
+            'seasonal_patterns': 0.7,     # Neu: saisonale Muster mit moderater Gewichtung
+            'key_level_break': 1.8        # Neu: hohe Gewichtung für Level-Ausbrüche
         }
         
         weighted_signals = {key: signal_components[key] * component_weights[key] for key in signal_components}

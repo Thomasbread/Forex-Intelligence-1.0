@@ -164,17 +164,22 @@ def calculate_indicators(data):
         df = df.xs(symbol, axis=1, level=1)
     
     try:
-        # Simple Moving Averages
+        # Simple Moving Averages - verschiedene Zeitfenster für bessere Analysekraft
+        df['SMA_10'] = df['Close'].rolling(window=10).mean()
         df['SMA_20'] = df['Close'].rolling(window=20).mean()
         df['SMA_50'] = df['Close'].rolling(window=50).mean()
+        df['SMA_100'] = df['Close'].rolling(window=100).mean()
         
         # Exponential Moving Averages
+        df['EMA_8'] = df['Close'].ewm(span=8, adjust=False).mean()
         df['EMA_12'] = df['Close'].ewm(span=12, adjust=False).mean()
         df['EMA_26'] = df['Close'].ewm(span=26, adjust=False).mean()
+        df['EMA_50'] = df['Close'].ewm(span=50, adjust=False).mean()
         
         # MACD
         df['MACD'] = df['EMA_12'] - df['EMA_26']
         df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
+        df['MACD_Hist'] = df['MACD'] - df['MACD_Signal']
         
         # Relative Strength Index (RSI)
         delta = df['Close'].diff()
@@ -191,6 +196,81 @@ def calculate_indicators(data):
         df['BB_StdDev'] = df['Close'].rolling(window=20).std()
         df['BB_Upper'] = df['BB_Middle'] + (df['BB_StdDev'] * 2)
         df['BB_Lower'] = df['BB_Middle'] - (df['BB_StdDev'] * 2)
+        df['BB_Width'] = (df['BB_Upper'] - df['BB_Lower']) / df['BB_Middle']  # Normalisierte Bandbreite
+        
+        # Stochastic Oscillator
+        n = 14  # Standardperiode für Stochastik
+        df['Stoch_K'] = 100 * ((df['Close'] - df['Low'].rolling(window=n).min()) / 
+                              (df['High'].rolling(window=n).max() - df['Low'].rolling(window=n).min()))
+        df['Stoch_D'] = df['Stoch_K'].rolling(window=3).mean()
+        
+        # Average Directional Index (ADX) - Trendstärke
+        high_change = df['High'].diff()
+        low_change = df['Low'].diff()
+        
+        tr1 = df['High'] - df['Low']
+        tr2 = abs(df['High'] - df['Close'].shift())
+        tr3 = abs(df['Low'] - df['Close'].shift())
+        
+        tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+        
+        # Berechnung der +DI und -DI
+        plus_dm = high_change.copy()
+        plus_dm[plus_dm < 0] = 0
+        plus_dm[(high_change < 0) | (high_change <= low_change.abs())] = 0
+        
+        minus_dm = low_change.abs().copy()
+        minus_dm[minus_dm < 0] = 0
+        minus_dm[(low_change > 0) | (low_change.abs() <= high_change)] = 0
+        
+        # Smoothen die Werte
+        window = 14
+        smoothed_tr = tr.rolling(window=window).sum()
+        smoothed_plus_dm = plus_dm.rolling(window=window).sum()
+        smoothed_minus_dm = minus_dm.rolling(window=window).sum()
+        
+        # DIs berechnen
+        plus_di = 100 * (smoothed_plus_dm / smoothed_tr)
+        minus_di = 100 * (smoothed_minus_dm / smoothed_tr)
+        
+        # ADX
+        dx = 100 * abs(plus_di - minus_di) / (plus_di + minus_di)
+        adx = dx.rolling(window=window).mean()
+        
+        df['ADX'] = adx
+        df['Plus_DI'] = plus_di
+        df['Minus_DI'] = minus_di
+        
+        # Identifizierung von Support/Resistance Levels
+        # Einfache Methode: Lokale Extrema über mehrere Perioden finden
+        window_size = 10
+        
+        # Lokale Hochs (potentielle Widerstände)
+        df['Resistance'] = df['High'].rolling(window=window_size, center=True).apply(
+            lambda x: 1 if x.iloc[len(x)//2] == max(x) else 0, raw=False
+        )
+        
+        # Lokale Tiefs (potentielle Unterstützungen)
+        df['Support'] = df['Low'].rolling(window=window_size, center=True).apply(
+            lambda x: 1 if x.iloc[len(x)//2] == min(x) else 0, raw=False
+        )
+        
+        # Pivotpunkte (tägliche Berechnung)
+        df['Pivot'] = (df['High'].shift(1) + df['Low'].shift(1) + df['Close'].shift(1)) / 3
+        df['R1'] = 2 * df['Pivot'] - df['Low'].shift(1)  # Resistance 1
+        df['S1'] = 2 * df['Pivot'] - df['High'].shift(1)  # Support 1
+        
+        # Fibonacci Retracement Levels für größere Trends
+        # Nehmen wir die letzten 50 Perioden für die Trendidentifikation
+        if len(df) >= 50:
+            recent_trend = df.iloc[-50:]
+            high_point = recent_trend['High'].max()
+            low_point = recent_trend['Low'].min()
+            diff = high_point - low_point
+            
+            df['Fib_38.2'] = high_point - (diff * 0.382)
+            df['Fib_50.0'] = high_point - (diff * 0.5)
+            df['Fib_61.8'] = high_point - (diff * 0.618)
     
     except Exception as e:
         print(f"Error calculating indicators: {e}")
@@ -210,16 +290,194 @@ def get_market_sentiment(pair):
         dict: Sentiment indicators
     """
     # In a real application, this would use news APIs, social media sentiment, etc.
-    # For this demo, we'll generate random sentiment
+    # Wir fügen mehr Faktoren hinzu, die in einer realen Implementierung über APIs geholt würden
     
-    bullish_probability = random.uniform(0, 1)
+    # Währungspaarinformationen extrahieren
+    base_currency = pair[:3]
+    quote_currency = pair[3:]
+    
+    # Simulierte wirtschaftliche Stärke für jede Währung
+    currencies = {
+        'EUR': {'strength': random.uniform(0.3, 0.8), 'volatility': random.uniform(0.1, 0.5)},
+        'USD': {'strength': random.uniform(0.4, 0.9), 'volatility': random.uniform(0.1, 0.4)},
+        'GBP': {'strength': random.uniform(0.3, 0.7), 'volatility': random.uniform(0.2, 0.6)},
+        'JPY': {'strength': random.uniform(0.3, 0.7), 'volatility': random.uniform(0.1, 0.3)},
+        'CHF': {'strength': random.uniform(0.4, 0.7), 'volatility': random.uniform(0.1, 0.3)},
+        'AUD': {'strength': random.uniform(0.3, 0.7), 'volatility': random.uniform(0.2, 0.5)},
+        'CAD': {'strength': random.uniform(0.3, 0.7), 'volatility': random.uniform(0.2, 0.5)},
+        'NZD': {'strength': random.uniform(0.3, 0.7), 'volatility': random.uniform(0.2, 0.6)}
+    }
+    
+    # Simulierte Wirtschaftsindikatoren und ihre Auswirkungen
+    economic_events = {
+        'EUR': {
+            'gdp_growth': random.uniform(-0.5, 2.0),
+            'interest_rate': random.uniform(0.0, 3.5),
+            'inflation': random.uniform(0.5, 5.0),
+            'unemployment': random.uniform(3.0, 9.0),
+            'recent_news': random.choice([
+                {'title': 'EZB erhöht Zinssätze', 'impact': 0.3, 'sentiment': 'bullish'},
+                {'title': 'Eurozone verzeichnet starkes BIP-Wachstum', 'impact': 0.4, 'sentiment': 'bullish'},
+                {'title': 'Inflation in der Eurozone steigt', 'impact': -0.2, 'sentiment': 'bearish'},
+                {'title': 'Industrieproduktion in der Eurozone sinkt', 'impact': -0.3, 'sentiment': 'bearish'},
+                {'title': 'Neutral: Wirtschaftsdaten gemischt', 'impact': 0.0, 'sentiment': 'neutral'}
+            ])
+        },
+        'USD': {
+            'gdp_growth': random.uniform(0.0, 3.0),
+            'interest_rate': random.uniform(1.0, 5.0),
+            'inflation': random.uniform(1.0, 6.0),
+            'unemployment': random.uniform(3.0, 6.0),
+            'recent_news': random.choice([
+                {'title': 'Fed signalisiert Zinserhöhungen', 'impact': 0.4, 'sentiment': 'bullish'},
+                {'title': 'US-Arbeitsmarkt stärker als erwartet', 'impact': 0.3, 'sentiment': 'bullish'},
+                {'title': 'US-Inflation übertrifft Erwartungen', 'impact': -0.3, 'sentiment': 'bearish'},
+                {'title': 'US-Handelsbilanzdefizit vergrößert sich', 'impact': -0.2, 'sentiment': 'bearish'},
+                {'title': 'Neutral: Gemischte Wirtschaftsdaten', 'impact': 0.0, 'sentiment': 'neutral'}
+            ])
+        },
+        'GBP': {
+            'gdp_growth': random.uniform(-0.5, 2.0),
+            'interest_rate': random.uniform(0.1, 4.0),
+            'inflation': random.uniform(1.0, 7.0),
+            'unemployment': random.uniform(3.0, 7.0),
+            'recent_news': random.choice([
+                {'title': 'Bank of England erhöht Zinssätze', 'impact': 0.3, 'sentiment': 'bullish'},
+                {'title': 'UK-Einzelhandelsumsätze übertreffen Erwartungen', 'impact': 0.25, 'sentiment': 'bullish'},
+                {'title': 'UK-Inflation bleibt hoch', 'impact': -0.2, 'sentiment': 'bearish'},
+                {'title': 'Brexit-Auswirkungen belasten UK-Wirtschaft', 'impact': -0.3, 'sentiment': 'bearish'},
+                {'title': 'Neutral: Gemischte UK-Wirtschaftsdaten', 'impact': 0.0, 'sentiment': 'neutral'}
+            ])
+        },
+        'JPY': {
+            'gdp_growth': random.uniform(-0.5, 1.5),
+            'interest_rate': random.uniform(-0.1, 0.5),
+            'inflation': random.uniform(0.0, 3.0),
+            'unemployment': random.uniform(2.0, 4.0),
+            'recent_news': random.choice([
+                {'title': 'Bank of Japan ändert Geldpolitik', 'impact': 0.3, 'sentiment': 'bullish'},
+                {'title': 'Japanische Exporte steigen', 'impact': 0.25, 'sentiment': 'bullish'},
+                {'title': 'Japans BIP schrumpft', 'impact': -0.3, 'sentiment': 'bearish'},
+                {'title': 'Demografische Herausforderungen in Japan', 'impact': -0.2, 'sentiment': 'bearish'},
+                {'title': 'Neutral: Wenig Änderung in der japanischen Wirtschaft', 'impact': 0.0, 'sentiment': 'neutral'}
+            ])
+        }
+    }
+    
+    # Für andere Währungen Standardwerte setzen
+    for curr in ['CHF', 'AUD', 'CAD', 'NZD']:
+        if curr not in economic_events:
+            economic_events[curr] = {
+                'gdp_growth': random.uniform(-0.5, 2.0),
+                'interest_rate': random.uniform(0.0, 3.0),
+                'inflation': random.uniform(0.5, 4.0),
+                'unemployment': random.uniform(3.0, 7.0),
+                'recent_news': random.choice([
+                    {'title': f'Zentralbank von {curr} ändert Geldpolitik', 'impact': 0.3, 'sentiment': 'bullish'},
+                    {'title': f'Wirtschaftswachstum in {curr} übertrifft Erwartungen', 'impact': 0.25, 'sentiment': 'bullish'},
+                    {'title': f'Inflation in {curr} steigt unerwartet', 'impact': -0.2, 'sentiment': 'bearish'},
+                    {'title': f'Wirtschaftliche Abschwächung in {curr}', 'impact': -0.3, 'sentiment': 'bearish'},
+                    {'title': f'Neutral: Stabile Wirtschaftslage in {curr}', 'impact': 0.0, 'sentiment': 'neutral'}
+                ])
+            }
+    
+    # Berechne relative Stärke basierend auf wirtschaftlichen Faktoren
+    base_strength = 0
+    quote_strength = 0
+    
+    if base_currency in economic_events:
+        base_eco = economic_events[base_currency]
+        # Positiver Einfluss: Höhere Zinssätze, höheres BIP-Wachstum
+        # Negativer Einfluss: Höhere Inflation, höhere Arbeitslosigkeit
+        base_strength += base_eco['interest_rate'] * 0.2
+        base_strength += base_eco['gdp_growth'] * 0.15
+        base_strength -= base_eco['inflation'] * 0.1
+        base_strength -= base_eco['unemployment'] * 0.05
+        
+        # News-Einfluss
+        if 'recent_news' in base_eco:
+            news = base_eco['recent_news']
+            if news['sentiment'] == 'bullish':
+                base_strength += news['impact']
+            elif news['sentiment'] == 'bearish':
+                base_strength -= news['impact']
+    
+    if quote_currency in economic_events:
+        quote_eco = economic_events[quote_currency]
+        quote_strength += quote_eco['interest_rate'] * 0.2
+        quote_strength += quote_eco['gdp_growth'] * 0.15
+        quote_strength -= quote_eco['inflation'] * 0.1
+        quote_strength -= quote_eco['unemployment'] * 0.05
+        
+        # News-Einfluss
+        if 'recent_news' in quote_eco:
+            news = quote_eco['recent_news']
+            if news['sentiment'] == 'bullish':
+                quote_strength += news['impact']
+            elif news['sentiment'] == 'bearish':
+                quote_strength -= news['impact']
+    
+    # Relative Stärke bestimmt Wahrscheinlichkeiten
+    # Wenn Base stärker ist als Quote → bullisch für das Paar (Base wird im Wert steigen)
+    strength_diff = base_strength - quote_strength
+    
+    # Normalisierung auf Wahrscheinlichkeitsskala
+    bullish_probability = min(max(0.5 + (strength_diff * 0.1), 0.1), 0.9)
     bearish_probability = 1 - bullish_probability
     
+    # Globale Marktfaktoren
+    global_risk_on = random.random() > 0.5  # Risk-on or Risk-off sentiment
+    
+    # Support/Resistance Signifikanz (wird aus den technischen Daten in signal_generator.py verwendet)
+    key_level_proximity = random.uniform(0, 1)  # Nähe zu wichtigen Unterstützungs-/Widerstandsniveaus
+    
+    # Volatilitätsanpassung basierend auf Währungseigenschaften
+    base_volatility = currencies.get(base_currency, {}).get('volatility', 0.3)
+    quote_volatility = currencies.get(quote_currency, {}).get('volatility', 0.3)
+    pair_volatility = (base_volatility + quote_volatility) / 2
+    
+    # Saisonale Muster (bestimmte Währungspaare zeigen saisonale Tendenzen)
+    month = datetime.now().month
+    seasonal_factor = 0
+    
+    # Beispiel: EUR/USD tendiert historisch gesehen dazu, im Dezember zu steigen (Jahresende)
+    if pair == "EURUSD" and month == 12:
+        seasonal_factor = 0.1
+    # AUD zeigt oft Schwäche während der Sommermonate in der nördlichen Hemisphäre
+    elif "AUD" in pair and month in [6, 7, 8]:
+        seasonal_factor = -0.05
+    
+    # Adjustiere Wahrscheinlichkeiten basierend auf saisonalen Faktoren
+    if seasonal_factor > 0:
+        bullish_probability = min(bullish_probability + seasonal_factor, 0.95)
+        bearish_probability = 1 - bullish_probability
+    elif seasonal_factor < 0:
+        bearish_probability = min(bearish_probability - seasonal_factor, 0.95)
+        bullish_probability = 1 - bearish_probability
+    
+    # Erstelle das endgültige Sentiment-Objekt mit umfangreichen Informationen
     sentiment = {
         'bullish_probability': bullish_probability,
         'bearish_probability': bearish_probability,
-        'trend_strength': random.uniform(0.3, 0.9),
-        'volatility': random.uniform(0.1, 0.8)
+        'trend_strength': random.uniform(0.3, 0.9),  # Stärke des aktuellen Trends
+        'volatility': pair_volatility,
+        
+        # Wirtschaftliche Faktoren
+        'interest_rate_diff': base_strength - quote_strength,
+        'economic_outlook': 'positiv' if base_strength > quote_strength else 'negativ',
+        
+        # Marktstimmung
+        'risk_sentiment': 'Risk-On' if global_risk_on else 'Risk-Off',
+        
+        # Support/Resistance
+        'key_level_proximity': key_level_proximity,
+        
+        # Saisonale Einflüsse
+        'seasonal_bias': seasonal_factor,
+        
+        # News für die Währungen
+        'base_currency_news': economic_events.get(base_currency, {}).get('recent_news', {'title': 'Keine aktuellen Nachrichten', 'impact': 0, 'sentiment': 'neutral'}),
+        'quote_currency_news': economic_events.get(quote_currency, {}).get('recent_news', {'title': 'Keine aktuellen Nachrichten', 'impact': 0, 'sentiment': 'neutral'})
     }
     
     return sentiment
