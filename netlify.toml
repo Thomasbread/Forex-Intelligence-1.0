@@ -1,0 +1,14 @@
+[build]
+  command = "pip install -r requirements-netlify.txt"
+  publish = "."
+
+[build.environment]
+  PYTHONUNBUFFERED = "1"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/streamlit"
+  status = 200
+
+[functions]
+  node_bundler = "esbuild"
