@@ -8,15 +8,3 @@
 
 [build.environment]
   NODE_VERSION = "18"
-
-[[redirects]]
-  from = "/*"
-  to = "https://forex-intelligence-app.streamlit.app"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/app/*"
-  to = "https://forex-intelligence-app.streamlit.app/:splat"
-  status = 301
-  force = true
