@@ -37,8 +37,14 @@ st.sidebar.markdown("### Markt Update")
 last_update_time = st.session_state.last_update.strftime("%d.%m.%Y %H:%M:%S")
 st.sidebar.text(f"Letztes Update: {last_update_time}")
 
-# Update button
+# Update button with info text
+st.sidebar.info("Die App generiert nur 1 Trade pro Minute mit hoher Sicherheit (\"sicher\" Konfidenz).")
 if st.sidebar.button("Aktualisieren"):
+    st.session_state.last_update = datetime.now()
+    st.rerun()
+
+# Auto-refresh every minute
+if datetime.now() - st.session_state.last_update > timedelta(minutes=1):
     st.session_state.last_update = datetime.now()
     st.rerun()
 

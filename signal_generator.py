@@ -6,27 +6,23 @@ from datetime import datetime, timedelta
 from data_handler import get_forex_data, calculate_indicators, get_market_sentiment
 from performance_tracker import update_performance
 
-def generate_signals(available_pairs, max_signals=10):
+def generate_signals(available_pairs, max_signals=1):
     """
     Generate trading signals based on market analysis.
     
     Args:
         available_pairs (list): List of available currency pairs
-        max_signals (int): Maximum number of signals to generate
+        max_signals (int): Maximum number of signals to generate (Default: 1)
         
     Returns:
         pandas.DataFrame: Generated trading signals
     """
     signals = []
+    best_signal = None
+    best_confidence_score = 0
     
-    # Determine how many signals to generate (2-10 per day)
-    num_signals = random.randint(2, max_signals)
-    
-    # Shuffle pairs to get random selection
-    random.shuffle(available_pairs)
-    selected_pairs = available_pairs[:num_signals]
-    
-    for pair in selected_pairs:
+    # Analyze all pairs but only keep the best signal
+    for pair in available_pairs:
         # Get forex data for analysis
         data = get_forex_data(pair, '1h', 100)
         
@@ -43,7 +39,26 @@ def generate_signals(available_pairs, max_signals=10):
         signal = analyze_market(pair, data_with_indicators, sentiment)
         
         if signal:
-            signals.append(signal)
+            # Calculate a confidence score for comparison
+            confidence_score = 0
+            if signal['confidence'] == 'sicher':
+                confidence_score = 3
+            elif signal['confidence'] == 'mittel':
+                confidence_score = 2
+            else:
+                confidence_score = 1
+                
+            # Add randomness to avoid always selecting the same pair
+            confidence_score += random.uniform(0, 0.5)
+            
+            # If this is the best signal so far, keep it
+            if confidence_score > best_confidence_score:
+                best_signal = signal
+                best_confidence_score = confidence_score
+    
+    # Only use the signal if it's "sicher" (secure)
+    if best_signal and best_signal['confidence'] == 'sicher':
+        signals.append(best_signal)
     
     # Convert to DataFrame
     if signals:
