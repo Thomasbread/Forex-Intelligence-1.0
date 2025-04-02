@@ -24,6 +24,10 @@ if 'viewed_signals' not in st.session_state:
 
 if 'last_update' not in st.session_state:
     st.session_state.last_update = datetime.now() - timedelta(hours=1)
+    
+# Initialize last signal state to keep showing the most recent signal
+if 'last_signal' not in st.session_state:
+    st.session_state.last_signal = None
 
 # Sidebar navigation
 page = st.sidebar.selectbox(
@@ -68,102 +72,102 @@ if page == "Trading Signals":
     with st.spinner("Analysiere Marktdaten..."):
         signals = generate_signals(available_pairs)
     
+    # If we have new signals, store the latest signal
     if not signals.empty:
-        # Group signals by confidence level
-        confidence_groups = {
-            "Sicher": signals[signals['confidence'] == 'sicher'],
-            "Mittel": signals[signals['confidence'] == 'mittel'],
-            "Unsicher": signals[signals['confidence'] == 'unsicher']
-        }
+        signal_to_display = signals.iloc[0].to_dict()
+        st.session_state.last_signal = signal_to_display
+    
+    # Display either the new signal or the last known signal
+    if st.session_state.last_signal is not None:
+        signal = st.session_state.last_signal
         
-        # Display signals by confidence level
-        for confidence, group_signals in confidence_groups.items():
-            if not group_signals.empty:
-                st.markdown(f"## {confidence} Signale")
+        # Determine confidence level and display header
+        confidence = signal['confidence']
+        st.markdown(f"## {confidence.capitalize()} Signale")
+        
+        # Create a unique ID for the signal
+        signal_id = f"{signal['pair']}-{signal['timestamp']}"
+        
+        # Check if this is a new signal
+        is_new = signal_id not in st.session_state.viewed_signals
+        
+        # Signal card with border color based on confidence
+        confidence_color = get_confidence_color(signal['confidence'])
+        
+        with st.container():
+            cols = st.columns([3, 1])
+            
+            with cols[0]:
+                # Signal header with NEW badge if applicable
+                header_text = f"{signal['pair']} - {signal['action'].upper()}"
+                if is_new:
+                    header_text = f"{header_text} 🆕"
+                    # Add to viewed signals
+                    st.session_state.viewed_signals.add(signal_id)
                 
-                for idx, signal in group_signals.iterrows():
-                    # Create a unique ID for each signal
-                    signal_id = f"{signal['pair']}-{signal['timestamp']}"
+                st.markdown(f"### {header_text}")
+                
+                # Signal details
+                # Convert Series values to Python scalar values if needed
+                entry_price = signal['entry_price'].item() if hasattr(signal['entry_price'], 'item') else signal['entry_price']
+                stop_loss = signal['stop_loss'].item() if hasattr(signal['stop_loss'], 'item') else signal['stop_loss']
+                take_profit = signal['take_profit'].item() if hasattr(signal['take_profit'], 'item') else signal['take_profit']
+                risk_reward = signal['risk_reward_ratio'].item() if hasattr(signal['risk_reward_ratio'], 'item') else signal['risk_reward_ratio']
+                timestamp = signal['timestamp']
+                
+                st.markdown(f"""
+                **Einstiegspunkt:** {entry_price:.5f}  
+                **Stop Loss:** {stop_loss:.5f}  
+                **Take Profit:** {take_profit:.5f}  
+                **Risiko/Gewinn Verhältnis:** 1:{risk_reward}  
+                **Zeitstempel:** {timestamp}
+                """)
+                
+                # Signal analysis
+                st.markdown("#### Analyse")
+                st.write(signal['analysis'])
+                
+                # Disclaimer for each signal
+                st.info("⚠️ Hinweis: Dies ist keine professionelle Finanzberatung, sondern basiert auf KI-Analysen.")
+            
+            with cols[1]:
+                # Get price chart for the pair
+                pair_data = get_forex_data(signal['pair'], '1h', 24)
+                
+                if not pair_data.empty:
+                    fig = go.Figure(data=[go.Candlestick(
+                        x=pair_data.index,
+                        open=pair_data['Open'],
+                        high=pair_data['High'],
+                        low=pair_data['Low'],
+                        close=pair_data['Close']
+                    )])
                     
-                    # Check if this is a new signal
-                    is_new = signal_id not in st.session_state.viewed_signals
+                    # Add entry, SL and TP lines
+                    entry_price = signal['entry_price'].item() if hasattr(signal['entry_price'], 'item') else signal['entry_price']
+                    stop_loss = signal['stop_loss'].item() if hasattr(signal['stop_loss'], 'item') else signal['stop_loss']
+                    take_profit = signal['take_profit'].item() if hasattr(signal['take_profit'], 'item') else signal['take_profit']
                     
-                    # Signal card with border color based on confidence
-                    confidence_color = get_confidence_color(signal['confidence'])
+                    fig.add_hline(y=entry_price, line_dash="solid", 
+                                 line_color="yellow", annotation_text="Entry")
+                    fig.add_hline(y=stop_loss, line_dash="dash", 
+                                 line_color="red", annotation_text="SL")
+                    fig.add_hline(y=take_profit, line_dash="dash", 
+                                 line_color="green", annotation_text="TP")
                     
-                    with st.container():
-                        cols = st.columns([3, 1])
-                        
-                        with cols[0]:
-                            # Signal header with NEW badge if applicable
-                            header_text = f"{signal['pair']} - {signal['action'].upper()}"
-                            if is_new:
-                                header_text = f"{header_text} 🆕"
-                                # Add to viewed signals
-                                st.session_state.viewed_signals.add(signal_id)
-                            
-                            st.markdown(f"### {header_text}")
-                            
-                            # Signal details
-                            # Convert Series values to Python scalar values if needed
-                            entry_price = signal['entry_price'].item() if hasattr(signal['entry_price'], 'item') else signal['entry_price']
-                            stop_loss = signal['stop_loss'].item() if hasattr(signal['stop_loss'], 'item') else signal['stop_loss']
-                            take_profit = signal['take_profit'].item() if hasattr(signal['take_profit'], 'item') else signal['take_profit']
-                            risk_reward = signal['risk_reward_ratio'].item() if hasattr(signal['risk_reward_ratio'], 'item') else signal['risk_reward_ratio']
-                            timestamp = signal['timestamp']
-                            
-                            st.markdown(f"""
-                            **Einstiegspunkt:** {entry_price:.5f}  
-                            **Stop Loss:** {stop_loss:.5f}  
-                            **Take Profit:** {take_profit:.5f}  
-                            **Risiko/Gewinn Verhältnis:** 1:{risk_reward}  
-                            **Zeitstempel:** {timestamp}
-                            """)
-                            
-                            # Signal analysis
-                            st.markdown("#### Analyse")
-                            st.write(signal['analysis'])
-                            
-                            # Disclaimer for each signal
-                            st.info("⚠️ Hinweis: Dies ist keine professionelle Finanzberatung, sondern basiert auf KI-Analysen.")
-                        
-                        with cols[1]:
-                            # Get price chart for the pair
-                            pair_data = get_forex_data(signal['pair'], '1h', 24)
-                            
-                            if not pair_data.empty:
-                                fig = go.Figure(data=[go.Candlestick(
-                                    x=pair_data.index,
-                                    open=pair_data['Open'],
-                                    high=pair_data['High'],
-                                    low=pair_data['Low'],
-                                    close=pair_data['Close']
-                                )])
-                                
-                                # Add entry, SL and TP lines
-                                entry_price = signal['entry_price'].item() if hasattr(signal['entry_price'], 'item') else signal['entry_price']
-                                stop_loss = signal['stop_loss'].item() if hasattr(signal['stop_loss'], 'item') else signal['stop_loss']
-                                take_profit = signal['take_profit'].item() if hasattr(signal['take_profit'], 'item') else signal['take_profit']
-                                
-                                fig.add_hline(y=entry_price, line_dash="solid", 
-                                             line_color="yellow", annotation_text="Entry")
-                                fig.add_hline(y=stop_loss, line_dash="dash", 
-                                             line_color="red", annotation_text="SL")
-                                fig.add_hline(y=take_profit, line_dash="dash", 
-                                             line_color="green", annotation_text="TP")
-                                
-                                fig.update_layout(
-                                    height=300,
-                                    margin=dict(l=0, r=0, t=0, b=0),
-                                    xaxis_rangeslider_visible=False
-                                )
-                                st.plotly_chart(fig, use_container_width=True)
-                            else:
-                                st.error("Chart Daten nicht verfügbar")
-                        
-                        st.markdown("---")
+                    fig.update_layout(
+                        height=300,
+                        margin=dict(l=0, r=0, t=0, b=0),
+                        xaxis_rangeslider_visible=False
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.error("Chart Daten nicht verfügbar")
+            
+            st.markdown("---")
     else:
-        st.info("Aktuell sind keine Trading Signale verfügbar. Bitte versuchen Sie es später erneut.")
+        # This should only happen on the very first run
+        st.info("Aktuell sind keine Trading Signale verfügbar. Bitte klicken Sie auf 'Aktualisieren', um ein Signal zu generieren.")
 
 elif page == "Performance History":
     st.title("Performance History")
