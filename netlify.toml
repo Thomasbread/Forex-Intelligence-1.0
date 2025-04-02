@@ -1,14 +1,26 @@
 [build]
-  command = "pip install -r requirements-netlify.txt"
-  publish = "."
+  command = """
+  pip install -r requirements-netlify.txt
+  mkdir -p build
+  cp index.html build/
+  cp -r assets build/
+  """
+  publish = "build/"
 
 [build.environment]
   PYTHONUNBUFFERED = "1"
+  NODE_VERSION = "18"
+
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
 
 [[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/streamlit"
-  status = 200
+  from = "/app/*"
+  to = "https://forex-intelligence-app.streamlit.app/:splat"
+  status = 301
+  force = true
 
-[functions]
-  node_bundler = "esbuild"
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/redirect"
+  status = 200
