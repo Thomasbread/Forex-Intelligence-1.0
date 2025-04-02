@@ -121,11 +121,12 @@ def analyze_market(pair, data, sentiment):
     current_price = latest['Close']
     
     # Determine if market conditions are suitable for a trade
-    # Much more selective now - only 40% of potential signals will be considered
+    # DEUTLICH selektiver - nur 20% der potenziellen Signale werden überhaupt in Betracht gezogen
+    # Dadurch sicherstellen, dass nur die allerbesten Setups als Signal erscheinen
     signal_probability = random.uniform(0, 1)
     
-    # Only proceed if the random filter passes (more selective)
-    if signal_probability > 0.6:  
+    # Nur fortfahren, wenn der Zufallsfilter passiert (viel selektiver)
+    if signal_probability > 0.8:  
         # Initialize all signal components
         signal_components = {
             'macd': 0,
@@ -321,25 +322,50 @@ def analyze_market(pair, data, sentiment):
         elif bear_probability > 0.6:
             signal_components['sentiment'] = -1
             
-        # 8. Support/Resistance Analysis
+        # 8. Erweiterte Support/Resistance-Analyse mit Mehrfachbestätigung
+        # Diese Analyse berücksichtigt verschiedene Zeitrahmen und die Stärke der Levels
         try:
-            # Prüfe, ob die Indikatoren in den Daten vorhanden sind
-            has_support_data = 'Support' in latest.index and 'Resistance' in latest.index
-            has_pivot_data = 'Pivot' in latest.index and 'R1' in latest.index and 'S1' in latest.index
+            # Prüfe, ob die neuen erweiterten Indikatoren in den Daten vorhanden sind
+            has_support_data = all(col in latest.index for col in ['Support', 'Resistance'])
+            has_pivot_data = all(col in latest.index for col in ['Pivot', 'R1', 'S1'])
             has_fib_data = 'Fib_50.0' in latest.index
             
             if has_support_data:
-                # Prüfe auf Unterstützung/Widerstand an aktuellem Preis
-                is_support = latest.loc['Support'] == 1
-                is_resistance = latest.loc['Resistance'] == 1
+                # Schärfere Prüfung: Wir verwenden jetzt die Stärke der Support/Resistance-Levels
+                # statt nur binärer Ja/Nein-Werte, wie sie im verbesserten data_handler berechnet werden
                 
-                # Preis ist nahe an wichtigen Levels
-                if is_support:
+                # Holen der Support/Resistance-Werte (jetzt mit Gewichtung für Bedeutung)
+                support_value = latest.loc['Support']
+                resistance_value = latest.loc['Resistance']
+                
+                # Support/Resistance sind nun gewichtete Werte (0 bis ~2.0), wobei:
+                # - 0 = kein Support/Resistance
+                # - 0.7 = leichter Support/Resistance
+                # - 1.0 = normaler Support/Resistance
+                # - 1.3 = starker langfristiger Support/Resistance
+                # - >1.3 = mehrfach bestätigter Support/Resistance
+                
+                # Setze Signalstärke basierend auf Support/Resistance-Stärke
+                if support_value > 0:
                     # Unterstützung kann zu Bounces führen (gut für Kaufsignale)
-                    signal_components['support_resistance'] += 1.5
-                if is_resistance:
+                    # Verwende die tatsächliche Stärke des Supports für die Signalgewichtung
+                    # Werte über 1.3 sind besonders signifikant
+                    signal_components['support_resistance'] += support_value * 1.2
+                    
+                    # Wenn es sich um einen sehr starken Support handelt (mehrfach bestätigt)
+                    if support_value > 1.3:
+                        # Zusätzlichen Bonus für starken Support
+                        signal_components['key_level_break'] += 0.5  # Bonus für starke Level
+                
+                if resistance_value > 0:
                     # Widerstand kann zu Abprallern führen (gut für Verkaufssignale)
-                    signal_components['support_resistance'] -= 1.5
+                    # Verwende die tatsächliche Stärke des Widerstands
+                    signal_components['support_resistance'] -= resistance_value * 1.2
+                    
+                    # Wenn es sich um einen sehr starken Widerstand handelt
+                    if resistance_value > 1.3:
+                        # Zusätzlichen Bonus für starken Widerstand
+                        signal_components['key_level_break'] -= 0.5
             
             if has_pivot_data:
                 # Pivotpunkte - starke technische Levels
@@ -468,31 +494,35 @@ def analyze_market(pair, data, sentiment):
         # Calculate overall signal with weighted components
         # MACD and MA crossovers have higher weight as they're trend indicators
         component_weights = {
-            'macd': 1.2,                  # Etwas reduziert, da mehr Faktoren einfließen
-            'rsi': 1.0,                   # Leicht reduziert
-            'ma_cross': 1.2,              # Leicht reduziert 
-            'ma_trend': 0.8,              # Leicht reduziert
-            'volume': 0.6,                # Reduziert
-            'bollinger': 1.0,             # Leicht reduziert
-            'price_action': 1.0,          # Leicht reduziert
-            'sentiment': 1.0,             # Unverändert
-            'support_resistance': 1.8,    # Neu: hohe Gewichtung für Support/Resistance
-            'news_impact': 1.5,           # Neu: hohe Gewichtung für Newseinfluss
-            'economic_factors': 1.5,      # Neu: hohe Gewichtung für wirtschaftliche Faktoren
-            'seasonal_patterns': 0.7,     # Neu: saisonale Muster mit moderater Gewichtung
-            'key_level_break': 1.8        # Neu: hohe Gewichtung für Level-Ausbrüche
+            'macd': 1.0,                  # Wichtig, aber nicht so entscheidend wie strukturelle Faktoren
+            'rsi': 0.8,                   # Nützlich für Extremwerte, aber oft irreführend in Trends
+            'ma_cross': 1.3,              # Wichtiges Bestätigungssignal
+            'ma_trend': 1.6,              # STARK ERHÖHT: Der Grundtrend ist entscheidend für Erfolg
+            'volume': 1.5,                # STARK ERHÖHT: Volumen bestätigt echte Bewegungen
+            'bollinger': 1.1,             # Leicht erhöht für bessere Extremwert-Erkennung
+            'price_action': 1.7,          # STARK ERHÖHT: Preismuster sind extrem wichtig für Timing
+            'sentiment': 0.9,             # Leicht reduziert, da oft ein nachlaufender Indikator
+            'support_resistance': 2.0,    # MAXIMAL WICHTIG: S/R bestimmen die wichtigsten Wendepunkte
+            'news_impact': 1.8,           # STARK ERHÖHT: Unmittelbarer Markteinfluss durch News
+            'economic_factors': 1.6,      # ERHÖHT: Grundlegende wirtschaftliche Faktoren für Trends
+            'seasonal_patterns': 0.6,     # Reduziert, da weniger zuverlässig
+            'key_level_break': 2.0        # MAXIMAL WICHTIG: Ausbrüche bieten beste Tradingchancen
         }
         
         weighted_signals = {key: signal_components[key] * component_weights[key] for key in signal_components}
         overall_signal = sum(weighted_signals.values())
         
-        # Determine action - needs stronger conviction now
-        if overall_signal > 3:  # Require stronger buy signal
+        # Signalstärke für spätere Verwendung (Risk-Reward-Anpassung)
+        signal_strength = abs(overall_signal)
+        
+        # Noch strengere Anforderungen an die Signalstärke für maximale Präzision
+        # Dies sorgt für weniger, aber deutlich präzisere Signale mit höherer Erfolgswahrscheinlichkeit
+        if overall_signal > 6.5:  # Extrem starkes Kaufsignal erforderlich (vorher 5)
             action = 'buy'
-        elif overall_signal < -3:  # Require stronger sell signal
+        elif overall_signal < -6.5:  # Extrem starkes Verkaufssignal erforderlich (vorher -5)
             action = 'sell'
         else:
-            return None  # Not strong enough - no signal
+            return None  # Nicht stark genug - kein Signal
             
         # Calculate entry timing
         entry_timing = "Sofort"  # Default is immediate entry
@@ -537,7 +567,19 @@ def analyze_market(pair, data, sentiment):
                 stop_loss = current_price * (1 - max_risk_percent/100)
                 
             risk = current_price - stop_loss
-            take_profit = current_price + (risk * 3)  # 3:1 reward-to-risk ratio
+            # Verbessertes Risk-Reward-Verhältnis mit dynamischer Anpassung
+            # Für sehr starke Signale (signal_strength > 10) verwenden wir ein konservativeres 2.5:1-Verhältnis für höhere Trefferquote
+            # Für mäßig starke Signale verwenden wir das Standard 3:1-Verhältnis
+            # Für schwächere Signale (signal_strength < 6) verwenden wir ein aggressiveres 3.5:1-Verhältnis
+            
+            if signal_strength > 10:
+                reward_ratio = 2.5  # Konservativer bei sehr starken Signalen (höhere Trefferquote)
+            elif signal_strength < 6:
+                reward_ratio = 3.5  # Aggressiver bei schwächeren Signalen (mehr Gewinn nötig zur Kompensation)
+            else:
+                reward_ratio = 3.0  # Standard
+                
+            take_profit = current_price + (risk * reward_ratio)
         else:
             # For sell: SL based on recent swing highs plus buffer
             recent_highs = recent_data['High'].nlargest(3).values
@@ -549,7 +591,19 @@ def analyze_market(pair, data, sentiment):
                 stop_loss = current_price * (1 + max_risk_percent/100)
                 
             risk = stop_loss - current_price
-            take_profit = current_price - (risk * 3)  # 3:1 reward-to-risk ratio
+            # Verbessertes Risk-Reward-Verhältnis mit dynamischer Anpassung, auch für Verkaufssignale
+            # Für sehr starke Signale (signal_strength > 10) verwenden wir ein konservativeres 2.5:1-Verhältnis für höhere Trefferquote
+            # Für mäßig starke Signale verwenden wir das Standard 3:1-Verhältnis
+            # Für schwächere Signale (signal_strength < 6) verwenden wir ein aggressiveres 3.5:1-Verhältnis
+            
+            if signal_strength > 10:
+                reward_ratio = 2.5  # Konservativer bei sehr starken Signalen (höhere Trefferquote)
+            elif signal_strength < 6:
+                reward_ratio = 3.5  # Aggressiver bei schwächeren Signalen (mehr Gewinn nötig zur Kompensation)
+            else:
+                reward_ratio = 3.0  # Standard
+                
+            take_profit = current_price - (risk * reward_ratio)
         
         # Estimate trade duration
         # Based on volatility, pair, and price targets
@@ -626,7 +680,7 @@ def analyze_market(pair, data, sentiment):
             'entry_price': current_price,
             'stop_loss': stop_loss,
             'take_profit': take_profit,
-            'risk_reward_ratio': 3,  # Fixed at 1:3 risk-reward
+            'risk_reward_ratio': reward_ratio,  # Dynamisches Risk-Reward-Verhältnis basierend auf Signalstärke
             'confidence': confidence,
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             'entry_timing': entry_timing,

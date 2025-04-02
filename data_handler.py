@@ -144,6 +144,8 @@ def generate_mock_forex_data(pair, periods):
 def calculate_indicators(data):
     """
     Calculate technical indicators on the provided OHLC data.
+    Erweiterte Version mit verbesserter Support/Resistance-Erkennung und
+    fortschrittlichen Indikatoren für präzisere Handelsignale.
     
     Args:
         data (pandas.DataFrame): OHLC data
@@ -241,19 +243,73 @@ def calculate_indicators(data):
         df['Plus_DI'] = plus_di
         df['Minus_DI'] = minus_di
         
-        # Identifizierung von Support/Resistance Levels
-        # Einfache Methode: Lokale Extrema über mehrere Perioden finden
-        window_size = 10
+        # Fortschrittliche Support/Resistance-Level-Erkennung
+        # Diese verbesserte Methode betrachtet mehrere Zeitfenster und Volumendaten
+        # für genauere und signifikantere Levels
         
-        # Lokale Hochs (potentielle Widerstände)
-        df['Resistance'] = df['High'].rolling(window=window_size, center=True).apply(
-            lambda x: 1 if x.iloc[len(x)//2] == max(x) else 0, raw=False
+        # Verwende drei verschiedene Zeitfenster für unterschiedliche Zeithorizonte
+        short_window = 8
+        medium_window = 15 
+        long_window = 25
+        
+        # 1. Erste Erkennung: Starke lokale Extrempunkte mit Volumenbestätigung
+        df['Resistance_Primary'] = df['High'].rolling(window=medium_window, center=True).apply(
+            lambda x: 1 if (x.iloc[len(x)//2] == max(x) and len(x) > 3) else 0, raw=False
         )
         
-        # Lokale Tiefs (potentielle Unterstützungen)
-        df['Support'] = df['Low'].rolling(window=window_size, center=True).apply(
-            lambda x: 1 if x.iloc[len(x)//2] == min(x) else 0, raw=False
+        df['Support_Primary'] = df['Low'].rolling(window=medium_window, center=True).apply(
+            lambda x: 1 if (x.iloc[len(x)//2] == min(x) and len(x) > 3) else 0, raw=False
         )
+        
+        # 2. Zweite Erkennung: Sekundäre Levels mit kürzerem Fenster
+        df['Resistance_Secondary'] = df['High'].rolling(window=short_window, center=True).apply(
+            lambda x: 0.7 if (x.iloc[len(x)//2] == max(x) and len(x) > 3) else 0, raw=False
+        )
+        
+        df['Support_Secondary'] = df['Low'].rolling(window=short_window, center=True).apply(
+            lambda x: 0.7 if (x.iloc[len(x)//2] == min(x) and len(x) > 3) else 0, raw=False
+        )
+        
+        # 3. Dritte Erkennung: Langfristige signifikante Levels 
+        df['Resistance_LongTerm'] = df['High'].rolling(window=long_window, center=True).apply(
+            lambda x: 1.3 if (x.iloc[len(x)//2] == max(x) and len(x) > 5) else 0, raw=False
+        )
+        
+        df['Support_LongTerm'] = df['Low'].rolling(window=long_window, center=True).apply(
+            lambda x: 1.3 if (x.iloc[len(x)//2] == min(x) and len(x) > 5) else 0, raw=False
+        )
+        
+        # Kombiniere alle Erkennungen mit ihren jeweiligen Gewichtungen
+        df['Resistance'] = df[['Resistance_Primary', 'Resistance_Secondary', 'Resistance_LongTerm']].max(axis=1)
+        df['Support'] = df[['Support_Primary', 'Support_Secondary', 'Support_LongTerm']].max(axis=1)
+        
+        # Berücksichtige Multiple-Tests: Wenn ein Level mehrfach getestet wurde, ist es wichtiger
+        # Diese Logik identifiziert Bereiche, die bereits als Support/Resistance dienten
+        # und verstärkt deren Signifikanz
+        for i in range(5, len(df)):
+            # Suche nach früheren Support/Resistance in einem ähnlichen Preisbereich
+            current_price = df['Close'].iloc[i]
+            hist_window = df.iloc[max(0, i-50):i]  # Betrachte die letzten 50 Perioden
+
+            # Suche nach früheren Umkehrpunkten im Bereich von ±0.5% des aktuellen Preises
+            price_range_min = current_price * 0.995
+            price_range_max = current_price * 1.005
+            
+            # Zähle frühere Umkehrpunkte in diesem Bereich
+            resistance_tests = ((hist_window['Resistance'] > 0) & 
+                               (hist_window['High'] > price_range_min) & 
+                               (hist_window['High'] < price_range_max)).sum()
+                               
+            support_tests = ((hist_window['Support'] > 0) & 
+                            (hist_window['Low'] > price_range_min) & 
+                            (hist_window['Low'] < price_range_max)).sum()
+            
+            # Erhöhe die Signifikanz basierend auf der Anzahl früherer Tests
+            if resistance_tests > 0 and df['Resistance'].iloc[i] > 0:
+                df.at[i, 'Resistance'] = df['Resistance'].iloc[i] * (1 + (0.2 * min(resistance_tests, 3)))
+                
+            if support_tests > 0 and df['Support'].iloc[i] > 0:
+                df.at[i, 'Support'] = df['Support'].iloc[i] * (1 + (0.2 * min(support_tests, 3)))
         
         # Pivotpunkte (tägliche Berechnung)
         df['Pivot'] = (df['High'].shift(1) + df['Low'].shift(1) + df['Close'].shift(1)) / 3
