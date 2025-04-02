@@ -115,11 +115,17 @@ if page == "Trading Signals":
                 risk_reward = signal['risk_reward_ratio'].item() if hasattr(signal['risk_reward_ratio'], 'item') else signal['risk_reward_ratio']
                 timestamp = signal['timestamp']
                 
+                # Get entry timing and estimated duration (handle both new and old signal formats)
+                entry_timing = signal.get('entry_timing', 'Sofort')
+                estimated_duration = signal.get('estimated_duration', 'Nicht verfügbar')
+                
                 st.markdown(f"""
                 **Einstiegspunkt:** {entry_price:.5f}  
                 **Stop Loss:** {stop_loss:.5f}  
                 **Take Profit:** {take_profit:.5f}  
                 **Risiko/Gewinn Verhältnis:** 1:{risk_reward}  
+                **Optimale Eintrittszeit:** {entry_timing}  
+                **Geschätzte Tradedauer:** {estimated_duration}  
                 **Zeitstempel:** {timestamp}
                 """)
                 
