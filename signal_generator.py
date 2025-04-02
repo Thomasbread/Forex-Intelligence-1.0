@@ -607,30 +607,49 @@ def analyze_market(pair, data, sentiment):
         
         # Estimate trade duration
         # Based on volatility, pair, and price targets
-        volatility_factor = sentiment['volatility']
-        
-        # Calculate approximate pips to target
-        pips_to_target = abs(take_profit - current_price) * 10000  # Convert to pips
-        
-        # Base duration on volatility and distance
-        if 'JPY' in pair:  # JPY pairs move differently
-            pips_to_target = pips_to_target / 100  # Adjust for JPY denomination
+        try:
+            volatility_factor = sentiment.get('volatility', 0.3)  # Standardwert falls nicht verfügbar
             
-        # Estimated hours based on volatility and distance
-        est_hours = pips_to_target / (5 + volatility_factor * 20)
-        
-        # Convert to a human-readable format
-        if est_hours < 24:
-            trade_duration = f"~{int(est_hours)} Stunden"
-        else:
-            est_days = est_hours / 24
-            trade_duration = f"~{int(est_days)} Tage"
+            # Calculate approximate pips to target
+            pips_to_target = abs(take_profit - current_price) * 10000  # Convert to pips
             
-        # Add variability based on market conditions
-        if volatility_factor < 0.3:  # Low volatility
-            trade_duration += " (bei niedriger Volatilität evtl. länger)"
-        elif volatility_factor > 0.7:  # High volatility
-            trade_duration += " (bei hoher Volatilität evtl. kürzer)"
+            # Base duration on volatility and distance
+            if 'JPY' in pair:  # JPY pairs move differently
+                pips_to_target = pips_to_target / 100  # Adjust for JPY denomination
+                
+            # Prüfen auf gültige Werte und Vermeidung von Division durch Null
+            denominator = 5 + volatility_factor * 20
+            if denominator <= 0 or not isinstance(pips_to_target, (int, float)) or np.isnan(pips_to_target):
+                # Fallback für ungültige Berechnungswerte
+                trade_duration = "~2-3 Tage (geschätzt)"
+            else:
+                # Estimated hours based on volatility and distance
+                est_hours = pips_to_target / denominator
+                
+                # Überprüfung auf NaN und ungültige Werte
+                if np.isnan(est_hours) or not np.isfinite(est_hours):
+                    trade_duration = "~2-3 Tage (geschätzt)"
+                else:
+                    # Convert to a human-readable format
+                    if est_hours < 24:
+                        # Stelle sicher, dass der Wert mindestens 1 ist
+                        hours_rounded = max(1, int(est_hours))
+                        trade_duration = f"~{hours_rounded} Stunden"
+                    else:
+                        est_days = est_hours / 24
+                        # Stelle sicher, dass der Wert mindestens 1 ist
+                        days_rounded = max(1, int(est_days))
+                        trade_duration = f"~{days_rounded} Tage"
+                    
+                    # Add variability based on market conditions
+                    if volatility_factor < 0.3:  # Low volatility
+                        trade_duration += " (bei niedriger Volatilität evtl. länger)"
+                    elif volatility_factor > 0.7:  # High volatility
+                        trade_duration += " (bei hoher Volatilität evtl. kürzer)"
+        except Exception as e:
+            # Fallback bei Ausnahmen
+            print(f"Fehler bei der Berechnung der Handelsdauer: {e}")
+            trade_duration = "~2-3 Tage (geschätzt)"
         
         # Calculate confidence level based on signal strength and confirmations
         # Much stricter confidence calculation
