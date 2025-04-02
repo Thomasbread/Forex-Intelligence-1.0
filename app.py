@@ -473,7 +473,7 @@ if page == "Trading Signals":
                             font=dict(size=25, color="rgba(255, 255, 255, 0.05)"),
                             align="center",
                             opacity=0.6,
-                            angle=30
+                            texttextangle=30
                         )
                         
                         # Plaziere den Chart mit einem einzigartigen Key für jedes Signal
@@ -638,7 +638,7 @@ elif page == "Performance History":
                 font=dict(size=25, color="rgba(255, 255, 255, 0.05)"),
                 align="center",
                 opacity=0.6,
-                angle=30
+                textangle=30
             )
             
             st.plotly_chart(fig_success, use_container_width=True, key="confidence_success_chart")
@@ -706,7 +706,7 @@ elif page == "Performance History":
                 font=dict(size=25, color="rgba(255, 255, 255, 0.05)"),
                 align="center",
                 opacity=0.6,
-                angle=30
+                textangle=30
             )
             
             st.plotly_chart(fig_pips, use_container_width=True, key="confidence_pips_chart")
