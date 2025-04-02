@@ -18,6 +18,117 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Custom CSS für ein epischeres Erscheinungsbild
+st.markdown("""
+<style>
+    /* Allgemeine Stylingverbesserungen */
+    .stApp {
+        background-image: linear-gradient(to bottom, #0f1c2e, #162236);
+    }
+    
+    /* Verbesserte Überschriften */
+    h1 {
+        background: linear-gradient(90deg, #00c7b7, #5ce1e6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800 !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        padding-bottom: 10px;
+        border-bottom: 2px solid #00c7b7;
+        margin-bottom: 30px !important;
+    }
+    
+    h2 {
+        color: #00c7b7 !important;
+        font-weight: 700 !important;
+        margin-top: 30px !important;
+    }
+    
+    h3 {
+        font-weight: 600 !important;
+        margin-top: 20px !important;
+        background: linear-gradient(90deg, #f1f1f1, #00c7b7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Container für Signale */
+    .stExpander {
+        border-left: 3px solid #00c7b7 !important;
+        padding-left: 10px !important;
+    }
+    
+    /* Bessere Buttons */
+    .stButton button {
+        background: linear-gradient(90deg, #00c7b7, #00a99d) !important;
+        color: white !important;
+        font-weight: bold !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 10px 20px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+    }
+    .stButton button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15) !important;
+    }
+    
+    /* Verbesserte Sidebar */
+    .css-1d391kg, [data-testid="stSidebar"] {
+        background-color: #1a2c42 !important;
+        border-right: 1px solid #304a6d !important;
+    }
+    
+    /* Infoboxen */
+    .stAlert {
+        border-radius: 5px !important;
+        border: none !important;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Metrics mit Glow-Effekt */
+    [data-testid="stMetric"] {
+        background-color: rgba(26, 44, 66, 0.7) !important;
+        border-radius: 10px !important;
+        padding: 15px !important;
+        box-shadow: 0 0 15px rgba(0, 199, 183, 0.2) !important;
+        border: 1px solid rgba(0, 199, 183, 0.2) !important;
+        transition: all 0.3s ease !important;
+    }
+    [data-testid="stMetric"]:hover {
+        box-shadow: 0 0 20px rgba(0, 199, 183, 0.4) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    /* Datentabellenverbesserungen */
+    .stDataFrame {
+        border-radius: 10px !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+    
+    /* Trading Signal Container */
+    .element-container {
+        background-color: rgba(26, 44, 66, 0.5) !important;
+        border-radius: 8px !important;
+        margin-bottom: 20px !important;
+        padding: 10px !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Animationen für Neue Signale */
+    @keyframes newSignalGlow {
+        0% { box-shadow: 0 0 5px rgba(0, 199, 183, 0.2); }
+        50% { box-shadow: 0 0 20px rgba(0, 199, 183, 0.5); }
+        100% { box-shadow: 0 0 5px rgba(0, 199, 183, 0.2); }
+    }
+    .new-signal {
+        animation: newSignalGlow 2s infinite;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Initialize session state for tracking viewed signals
 if 'viewed_signals' not in st.session_state:
     st.session_state.viewed_signals = set()
@@ -34,20 +145,67 @@ if 'last_signal' not in st.session_state:
     st.session_state.last_signal = None
 
 # Sidebar navigation
-page = st.sidebar.selectbox(
-    "Navigation",
-    ["Trading Signals", "Performance History", "Contact"]
-)
+# Verbesserte Sidebar-Navigation mit Icons und Styling
+st.sidebar.markdown("""
+<div style="text-align: center; margin-bottom: 20px;">
+    <div style="background: linear-gradient(90deg, #00c7b7, #5ce1e6); height: 3px; margin-bottom: 20px;"></div>
+    <h3 style="color: #00c7b7; font-weight: 700; letter-spacing: 1px;">NAVIGATION</h3>
+    <div style="background: linear-gradient(90deg, #5ce1e6, #00c7b7); height: 3px; margin-top: 10px;"></div>
+</div>
+""", unsafe_allow_html=True)
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("### Markt Update")
-# Show last update time
+# Erstelle Navigation mit Icons
+page_icons = {
+    "Trading Signals": "📊",
+    "Performance History": "📈",
+    "Contact": "✉️"
+}
+
+# Navigation-Optionen
+pages = list(page_icons.keys())
+
+# Erzeuge die Auswahlbox mit Icons
+page_options = [f"{icon} {page}" for page, icon in page_icons.items()]
+selected_page = st.sidebar.selectbox("", page_options, label_visibility="collapsed")
+
+# Extrahiere den Seitennamen ohne Icon
+page = selected_page.split(" ", 1)[1]
+
+st.sidebar.markdown("<div style='background: linear-gradient(90deg, #00c7b7, #5ce1e6, #00c7b7); height: 2px; margin: 20px 0;'></div>", unsafe_allow_html=True)
+
+# Verbesserte Markt-Update-Sektion
+st.sidebar.markdown("""
+<div style="background: linear-gradient(135deg, rgba(26, 44, 66, 0.8), rgba(15, 28, 46, 0.9));
+            padding: 15px; border-radius: 10px; 
+            border-left: 3px solid #00c7b7; margin-bottom: 20px;">
+    <h3 style="color: #00c7b7; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center;">
+        <span style="margin-right: 10px;">⏱️</span> MARKT UPDATE
+    </h3>
+""", unsafe_allow_html=True)
+
+# Show last update time mit formatierter Zeit
 last_update_time = st.session_state.last_update.strftime("%d.%m.%Y %H:%M:%S")
-st.sidebar.text(f"Letztes Update: {last_update_time}")
+st.sidebar.markdown(f"""
+<div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding: 8px; background-color: rgba(0,0,0,0.2); border-radius: 5px;">
+    <span style="color: rgba(255,255,255,0.8);">Letztes Update:</span>
+    <span style="color: #00c7b7; font-weight: bold;">{last_update_time}</span>
+</div>
+""", unsafe_allow_html=True)
 
-# Update button with info text
-st.sidebar.info("Die App generiert nur 1 Trade pro Minute mit hoher Sicherheit (\"sicher\" Konfidenz).")
-if st.sidebar.button("Aktualisieren"):
+# Update button mit info text
+st.sidebar.markdown("""
+<div style="background-color: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 5px; margin-top: 10px; margin-bottom: 15px;">
+    <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.9em; margin-bottom: 5px;">
+        Die App generiert bis zu 5 Trades mit unterschiedlichen Konfidenzstufen (sicher, mittel, unsicher).
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# Schließe die Container-Div
+st.sidebar.markdown("</div>", unsafe_allow_html=True)
+
+# Stylischer Update-Button
+if st.sidebar.button("🔄 Markt Aktualisieren", use_container_width=True):
     st.session_state.last_update = datetime.now()
     st.rerun()
 
@@ -66,8 +224,58 @@ Handeln Sie auf eigenes Risiko.
 
 # Main content
 if page == "Trading Signals":
-    st.title("Forex Intelligence")
-    st.subheader("KI-generierte Forex Trading Signale")
+    # Epischer Header mit Hintergrundeffekt und animiertem Logo
+    st.markdown("""
+    <div style="background-image: linear-gradient(to right, rgba(15, 28, 46, 0.8), rgba(26, 44, 66, 0.8)), 
+                url('https://i.imgur.com/7Ty2kJM.png'); 
+                background-size: cover; padding: 30px; border-radius: 15px; 
+                margin-bottom: 30px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+            <div style="width: 60px; height: 60px; margin-right: 20px; background: linear-gradient(135deg, #00c7b7, #5ce1e6); 
+                        border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0, 199, 183, 0.5);">
+                <span style="font-size: 30px;">📊</span>
+            </div>
+            <h1 style="margin: 0; background: linear-gradient(90deg, #00c7b7, #5ce1e6); 
+                      -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+                      font-size: 48px; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+                FOREX INTELLIGENCE
+            </h1>
+        </div>
+        <p style="color: #f1f1f1; font-size: 18px; max-width: 800px; margin: 0 auto; letter-spacing: 1px;">
+            Fortschrittliche KI-gestützte <span style="color: #00c7b7; font-weight: bold;">Handelsanalyse und Signalgenerierung</span> 
+            für optimale Entscheidungen auf dem Forex-Markt.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Informationsbereich mit hübscher Grafik
+    st.markdown("""
+    <div style="display: flex; background: linear-gradient(135deg, rgba(0, 199, 183, 0.1), rgba(26, 44, 66, 0.3)); 
+                border-radius: 10px; margin-bottom: 30px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <div style="padding: 20px; flex: 1;">
+            <h3 style="color: #00c7b7; margin-bottom: 15px; font-weight: 600;">KI-gesteuerte Trading Signale</h3>
+            <p style="color: #f1f1f1; margin-bottom: 15px;">
+                Unsere fortschrittlichen Algorithmen analysieren kontinuierlich die Forex-Märkte, 
+                identifizieren potenzielle Trading-Chancen und generieren präzise Handelssignale mit:
+            </p>
+            <ul style="color: #f1f1f1; padding-left: 20px;">
+                <li>Optimalen Einstiegspunkten</li>
+                <li>Strategischen Stop-Loss und Take-Profit Levels</li>
+                <li>Risiko/Gewinn-Verhältnis von 1:3</li>
+                <li>Konfidenzbewertungen für jedes Signal</li>
+                <li>Empfehlungen zum besten Eintrittszeitpunkt</li>
+            </ul>
+        </div>
+        <div style="width: 200px; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 150px; height: 150px; border-radius: 50%; 
+                     background: linear-gradient(135deg, #00c7b7, #0f1c2e); 
+                     display: flex; align-items: center; justify-content: center; 
+                     box-shadow: 0 0 30px rgba(0, 199, 183, 0.3);">
+                <span style="font-size: 70px;">🤖</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Get real forex data for available pairs
     available_pairs = get_available_pairs()
@@ -167,34 +375,120 @@ if page == "Trading Signals":
                     pair_data = get_forex_data(signal['pair'], '1h', 24)
                     
                     if not pair_data.empty:
+                        # Erstelle einen eindrucksvolleren Chart mit besserer Optik
                         fig = go.Figure(data=[go.Candlestick(
                             x=pair_data.index,
                             open=pair_data['Open'],
                             high=pair_data['High'],
                             low=pair_data['Low'],
-                            close=pair_data['Close']
+                            close=pair_data['Close'],
+                            increasing_line_color='#00c7b7',  # Türkis für steigende Kerzen
+                            decreasing_line_color='#ef4056',  # Rot für fallende Kerzen
+                            increasing_fillcolor='rgba(0, 199, 183, 0.3)',  # Transparentes Türkis
+                            decreasing_fillcolor='rgba(239, 64, 86, 0.3)',  # Transparentes Rot
+                            line=dict(width=1)
                         )])
                         
-                        # Add entry, SL and TP lines
+                        # Add entry, SL and TP lines mit besseren Farben und Beschriftungen
                         entry_price = signal['entry_price'].item() if hasattr(signal['entry_price'], 'item') else signal['entry_price']
                         stop_loss = signal['stop_loss'].item() if hasattr(signal['stop_loss'], 'item') else signal['stop_loss']
                         take_profit = signal['take_profit'].item() if hasattr(signal['take_profit'], 'item') else signal['take_profit']
                         
-                        fig.add_hline(y=entry_price, line_dash="solid", 
-                                     line_color="yellow", annotation_text="Entry")
-                        fig.add_hline(y=stop_loss, line_dash="dash", 
-                                     line_color="red", annotation_text="SL")
-                        fig.add_hline(y=take_profit, line_dash="dash", 
-                                     line_color="green", annotation_text="TP")
+                        # Berechne möglichen Gewinn und Verlust
+                        risk_pips = abs(entry_price - stop_loss)
+                        reward_pips = abs(take_profit - entry_price)
                         
+                        # Add fancy lines mit Annotationen
+                        action_color = "#00c7b7" if signal['action'] == 'buy' else "#ef4056"
+                        
+                        # Entry-Linie
+                        fig.add_hline(
+                            y=entry_price, 
+                            line_dash="solid", 
+                            line_color="#ffcc00",  # Gold für Entry
+                            line_width=2,
+                            annotation_text="ENTRY",
+                            annotation_position="right",
+                            annotation_font_color="#ffcc00",
+                            annotation_font_size=14,
+                            annotation_bgcolor="rgba(15, 28, 46, 0.8)"  # Halbtransparenter dunkler Hintergrund
+                        )
+                        
+                        # Stop-Loss-Linie
+                        fig.add_hline(
+                            y=stop_loss, 
+                            line_dash="dash", 
+                            line_color="#ef4056",  # Rot für Stop Loss
+                            line_width=2,
+                            annotation_text=f"SL ({risk_pips:.1f} pips)",
+                            annotation_position="right",
+                            annotation_font_color="#ef4056",
+                            annotation_font_size=14,
+                            annotation_bgcolor="rgba(15, 28, 46, 0.8)"
+                        )
+                        
+                        # Take-Profit-Linie
+                        fig.add_hline(
+                            y=take_profit, 
+                            line_dash="dash", 
+                            line_color="#00c7b7",  # Türkis für Take Profit
+                            line_width=2,
+                            annotation_text=f"TP ({reward_pips:.1f} pips)",
+                            annotation_position="right",
+                            annotation_font_color="#00c7b7",
+                            annotation_font_size=14,
+                            annotation_bgcolor="rgba(15, 28, 46, 0.8)"
+                        )
+                        
+                        # Diagramm-Layout verbessern
                         fig.update_layout(
                             height=300,
-                            margin=dict(l=0, r=0, t=0, b=0),
-                            xaxis_rangeslider_visible=False
+                            margin=dict(l=0, r=0, t=30, b=0),
+                            xaxis_rangeslider_visible=False,
+                            plot_bgcolor='rgba(15, 28, 46, 1)',  # Dunkler Hintergrund
+                            paper_bgcolor='rgba(15, 28, 46, 0)',  # Transparenter Hintergrund um das Diagramm
+                            font=dict(color='#f1f1f1'),  # Weiße Schrift
+                            title=dict(
+                                text=f"{signal['pair']} Chart | {signal['action'].upper()}", 
+                                font=dict(size=16, color="#00c7b7")
+                            ),
+                            xaxis=dict(
+                                showgrid=True,
+                                gridcolor='rgba(255, 255, 255, 0.1)',
+                                title=None
+                            ),
+                            yaxis=dict(
+                                showgrid=True,
+                                gridcolor='rgba(255, 255, 255, 0.1)',
+                                title=None
+                            )
                         )
-                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # Füge Wasserzeichen hinzu
+                        fig.add_annotation(
+                            xref="paper", yref="paper",
+                            x=0.5, y=0.5,
+                            text="FOREX INTELLIGENCE",
+                            showarrow=False,
+                            font=dict(size=25, color="rgba(255, 255, 255, 0.05)"),
+                            align="center",
+                            opacity=0.6,
+                            angle=30
+                        )
+                        
+                        # Plaziere den Chart mit einem einzigartigen Key für jedes Signal
+                        st.plotly_chart(fig, use_container_width=True, key=f"chart_{signal_id}")
+                        
+                        # Zeige ein visuelles Konfidenz-Badge an
+                        confidence_badge = {
+                            'sicher': "🟢 Hohe Konfidenz", 
+                            'mittel': "🟠 Mittlere Konfidenz", 
+                            'unsicher': "🔴 Niedrige Konfidenz"
+                        }
+                        st.markdown(f"<div style='text-align: center; padding: 5px; background-color: rgba(26, 44, 66, 0.7); border-radius: 5px;'>{confidence_badge.get(confidence, 'Unbekannt')}</div>", unsafe_allow_html=True)
                     else:
-                        st.error("Chart Daten nicht verfügbar")
+                        # Verbesserte Fehlermeldung
+                        st.error("📊 Chart Daten nicht verfügbar - Bitte aktualisieren Sie die Seite.")
                 
                 st.markdown("---")
     else:
@@ -202,7 +496,29 @@ if page == "Trading Signals":
         st.info("Aktuell sind keine Trading Signale verfügbar. Bitte klicken Sie auf 'Aktualisieren', um ein Signal zu generieren.")
 
 elif page == "Performance History":
-    st.title("Performance History")
+    # Epischer Header für die Performance-Seite
+    st.markdown("""
+    <div style="background-image: linear-gradient(to right, rgba(15, 28, 46, 0.8), rgba(26, 44, 66, 0.8)), 
+                url('https://i.imgur.com/7Ty2kJM.png'); 
+                background-size: cover; padding: 30px; border-radius: 15px; 
+                margin-bottom: 30px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+            <div style="width: 60px; height: 60px; margin-right: 20px; background: linear-gradient(135deg, #00c7b7, #5ce1e6); 
+                        border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0, 199, 183, 0.5);">
+                <span style="font-size: 30px;">📈</span>
+            </div>
+            <h1 style="margin: 0; background: linear-gradient(90deg, #00c7b7, #5ce1e6); 
+                      -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+                      font-size: 48px; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+                PERFORMANCE HISTORY
+            </h1>
+        </div>
+        <p style="color: #f1f1f1; font-size: 18px; max-width: 800px; margin: 0 auto; letter-spacing: 1px;">
+            <span style="color: #00c7b7; font-weight: bold;">Detaillierte Analyse und Tracking</span> 
+            der historischen Signalperformance und Handelsgewinne im Zeitverlauf.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Get performance data
     performance_data = get_performance_history()
@@ -240,39 +556,160 @@ elif page == "Performance History":
         col1, col2 = st.columns(2)
         
         with col1:
-            # Create bar chart for success rate by confidence
+            # Verbesserte Erfolgsraten-Visualisierung
             fig_success = go.Figure()
+            
+            # Balkendiagramm mit Farbverlauf nach Konfidenz
+            color_map = {
+                'unsicher': '#ef4056',  # Rot
+                'mittel': '#ffcc00',    # Gold
+                'sicher': '#00c7b7'     # Türkis
+            }
+            
+            # Sortieren nach Zuverlässigkeit (niedrig zu hoch)
+            confidence_order = ['unsicher', 'mittel', 'sicher']
+            confidence_df_sorted = confidence_df.set_index('Konfidenz').loc[confidence_order].reset_index()
+            
+            # Hinzufügen der Balken
             fig_success.add_trace(go.Bar(
-                x=confidence_df['Konfidenz'],
-                y=confidence_df['Erfolgsrate (%)'],
-                marker_color=['#ff9999', '#ffcc99', '#99ff99'],
-                text=confidence_df['Erfolgsrate (%)'].apply(lambda x: f"{x:.1f}%"),
-                textposition='auto'
+                x=confidence_df_sorted['Konfidenz'],
+                y=confidence_df_sorted['Erfolgsrate (%)'],
+                marker=dict(
+                    color=[color_map.get(conf, '#777777') for conf in confidence_df_sorted['Konfidenz']],
+                    line=dict(width=1, color='rgba(255, 255, 255, 0.5)')
+                ),
+                text=confidence_df_sorted['Erfolgsrate (%)'].apply(lambda x: f"{x:.1f}%"),
+                textposition='auto',
+                hovertemplate='%{x}: %{y:.1f}%<extra></extra>'
             ))
+            
+            # Styling verbessern
             fig_success.update_layout(
-                title="Erfolgsrate nach Konfidenz",
-                xaxis_title="Konfidenz",
-                yaxis_title="Erfolgsrate (%)",
-                yaxis=dict(range=[0, 100])
+                title=dict(
+                    text="Erfolgsrate nach Konfidenz",
+                    font=dict(size=24, color="#00c7b7"),
+                    x=0.5,
+                    y=0.95
+                ),
+                xaxis=dict(
+                    title="Konfidenz",
+                    titlefont=dict(size=16),
+                    tickfont=dict(size=14),
+                    showgrid=True,
+                    gridcolor='rgba(255, 255, 255, 0.1)'
+                ),
+                yaxis=dict(
+                    title="Erfolgsrate (%)",
+                    titlefont=dict(size=16),
+                    tickfont=dict(size=14),
+                    range=[0, 100],
+                    showgrid=True,
+                    gridcolor='rgba(255, 255, 255, 0.1)'
+                ),
+                plot_bgcolor='rgba(15, 28, 46, 1)',
+                paper_bgcolor='rgba(15, 28, 46, 0)',
+                font=dict(color='#f1f1f1'),
+                margin=dict(l=40, r=40, t=80, b=40),
+                bargap=0.2
             )
-            st.plotly_chart(fig_success, use_container_width=True)
+            
+            # Linien für visuelle Referenz hinzufügen
+            fig_success.add_shape(
+                type="line",
+                x0=-0.5, x1=2.5,
+                y0=50, y1=50,
+                line=dict(color="rgba(255, 255, 255, 0.5)", width=1, dash="dash")
+            )
+            
+            # Hinzufügen von Beschriftung für die Referenzlinie
+            fig_success.add_annotation(
+                x=2.4, y=50,
+                text="50%",
+                showarrow=False,
+                font=dict(color="rgba(255, 255, 255, 0.5)")
+            )
+            
+            # Wasserzeichen hinzufügen
+            fig_success.add_annotation(
+                xref="paper", yref="paper",
+                x=0.5, y=0.5,
+                text="FOREX INTELLIGENCE",
+                showarrow=False,
+                font=dict(size=25, color="rgba(255, 255, 255, 0.05)"),
+                align="center",
+                opacity=0.6,
+                angle=30
+            )
+            
+            st.plotly_chart(fig_success, use_container_width=True, key="confidence_success_chart")
         
         with col2:
-            # Create bar chart for pips by confidence
+            # Verbesserte Pips-Visualisierung
             fig_pips = go.Figure()
-            fig_pips.add_trace(go.Bar(
-                x=confidence_df['Konfidenz'],
-                y=confidence_df['Pips'],
-                marker_color=['#ff9999', '#ffcc99', '#99ff99'],
-                text=confidence_df['Pips'].apply(lambda x: f"{x:.1f}"),
-                textposition='auto'
-            ))
-            fig_pips.update_layout(
-                title="Gesamtgewinn/-verlust nach Konfidenz",
-                xaxis_title="Konfidenz",
-                yaxis_title="Pips"
+            
+            # Berechne positive und negative Werte
+            confidence_df_sorted['color'] = confidence_df_sorted['Pips'].apply(
+                lambda x: '#00c7b7' if x > 0 else '#ef4056'
             )
-            st.plotly_chart(fig_pips, use_container_width=True)
+            
+            # Balkendiagramm
+            fig_pips.add_trace(go.Bar(
+                x=confidence_df_sorted['Konfidenz'],
+                y=confidence_df_sorted['Pips'],
+                marker=dict(
+                    color=confidence_df_sorted['color'],
+                    line=dict(width=1, color='rgba(255, 255, 255, 0.5)')
+                ),
+                text=confidence_df_sorted['Pips'].apply(lambda x: f"{x:.1f}"),
+                textposition='auto',
+                hovertemplate='%{x}: %{y:.1f} Pips<extra></extra>'
+            ))
+            
+            # Styling verbessern
+            fig_pips.update_layout(
+                title=dict(
+                    text="Gewinn/Verlust nach Konfidenz",
+                    font=dict(size=24, color="#00c7b7"),
+                    x=0.5,
+                    y=0.95
+                ),
+                xaxis=dict(
+                    title="Konfidenz",
+                    titlefont=dict(size=16),
+                    tickfont=dict(size=14),
+                    showgrid=True,
+                    gridcolor='rgba(255, 255, 255, 0.1)'
+                ),
+                yaxis=dict(
+                    title="Pips",
+                    titlefont=dict(size=16),
+                    tickfont=dict(size=14),
+                    showgrid=True,
+                    gridcolor='rgba(255, 255, 255, 0.1)',
+                    zeroline=True,
+                    zerolinecolor='rgba(255, 255, 255, 0.3)',
+                    zerolinewidth=2
+                ),
+                plot_bgcolor='rgba(15, 28, 46, 1)',
+                paper_bgcolor='rgba(15, 28, 46, 0)',
+                font=dict(color='#f1f1f1'),
+                margin=dict(l=40, r=40, t=80, b=40),
+                bargap=0.2
+            )
+            
+            # Wasserzeichen hinzufügen
+            fig_pips.add_annotation(
+                xref="paper", yref="paper",
+                x=0.5, y=0.5,
+                text="FOREX INTELLIGENCE",
+                showarrow=False,
+                font=dict(size=25, color="rgba(255, 255, 255, 0.05)"),
+                align="center",
+                opacity=0.6,
+                angle=30
+            )
+            
+            st.plotly_chart(fig_pips, use_container_width=True, key="confidence_pips_chart")
         
         # Performance over time
         st.subheader("Performance im Zeitverlauf")
@@ -282,30 +719,126 @@ elif page == "Performance History":
         time_performance = performance_data.groupby('date')['profit_loss_pips'].sum().reset_index()
         time_performance['cumulative'] = time_performance['profit_loss_pips'].cumsum()
         
-        # Create line chart for cumulative performance
+        # Erstelle ein modernes und beeindruckendes Performance-Diagramm
         fig_time = go.Figure()
+        
+        # Füge Balken für tägliche Performance mit verbesserten Farben hinzu
+        fig_time.add_trace(go.Bar(
+            x=time_performance['date'],
+            y=time_performance['profit_loss_pips'],
+            name='Täglicher Gewinn/Verlust',
+            marker_color=time_performance['profit_loss_pips'].apply(
+                lambda x: '#00c7b7' if x > 0 else '#ef4056'  # Türkis für positiv, Rot für negativ
+            ),
+            opacity=0.8,
+            hovertemplate='%{x|%d.%m.%Y}: %{y:.1f} Pips<extra></extra>'
+        ))
+        
+        # Füge eine Area-Füllung unter der kumulativen Linie hinzu
+        cumulative_color = '#00c7b7' if time_performance['cumulative'].iloc[-1] >= 0 else '#ef4056'
+        
+        # Transparenter Farbverlauf unter der Linie 
+        fig_time.add_trace(go.Scatter(
+            x=time_performance['date'],
+            y=time_performance['cumulative'],
+            mode='none',
+            fill='tozeroy',
+            fillcolor=f'rgba({", ".join(str(int(cumulative_color[i:i+2], 16)) for i in (1, 3, 5))}, 0.2)',
+            hoverinfo='skip',
+            showlegend=False
+        ))
+        
+        # Füge die Hauptlinie für kumulativen Gewinn/Verlust hinzu
         fig_time.add_trace(go.Scatter(
             x=time_performance['date'],
             y=time_performance['cumulative'],
             mode='lines+markers',
-            name='Kumulativ',
-            line=dict(color='#0A2463', width=2)
+            name='Kumulativer Gewinn/Verlust',
+            line=dict(
+                color=cumulative_color,
+                width=3,
+                shape='spline',  # Sanfte Kurven
+                smoothing=1.3
+            ),
+            marker=dict(
+                size=8,
+                color=cumulative_color,
+                line=dict(
+                    color='white',
+                    width=1
+                )
+            ),
+            hovertemplate='%{x|%d.%m.%Y}: %{y:.1f} Pips (Gesamt)<extra></extra>'
         ))
-        fig_time.add_trace(go.Bar(
-            x=time_performance['date'],
-            y=time_performance['profit_loss_pips'],
-            name='Täglich',
-            marker_color=time_performance['profit_loss_pips'].apply(
-                lambda x: 'green' if x > 0 else 'red'
+        
+        # Füge eine horizontale Linie bei 0 hinzu
+        fig_time.add_shape(
+            type="line",
+            x0=time_performance['date'].min(),
+            x1=time_performance['date'].max(),
+            y0=0, y1=0,
+            line=dict(
+                color="rgba(255, 255, 255, 0.5)",
+                width=1,
+                dash="dash"
             )
-        ))
-        fig_time.update_layout(
-            title="Performance im Zeitverlauf",
-            xaxis_title="Datum",
-            yaxis_title="Pips",
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
         )
-        st.plotly_chart(fig_time, use_container_width=True)
+        
+        # Füge Wasserzeichen hinzu
+        fig_time.add_annotation(
+            xref="paper", yref="paper",
+            x=0.5, y=0.5,
+            text="FOREX INTELLIGENCE",
+            showarrow=False,
+            font=dict(size=30, color="rgba(255, 255, 255, 0.05)"),
+            align="center"
+        )
+        
+        # Verbessere das Layout
+        fig_time.update_layout(
+            title=dict(
+                text="Performance im Zeitverlauf",
+                font=dict(size=24, color="#00c7b7"),
+                x=0.5,
+                y=0.95
+            ),
+            xaxis=dict(
+                title="Datum",
+                titlefont=dict(size=16),
+                tickfont=dict(size=14),
+                showgrid=True,
+                gridcolor='rgba(255, 255, 255, 0.1)',
+                tickformat='%d.%m.%Y'
+            ),
+            yaxis=dict(
+                title="Pips",
+                titlefont=dict(size=16),
+                tickfont=dict(size=14),
+                showgrid=True,
+                gridcolor='rgba(255, 255, 255, 0.1)',
+                zeroline=True,
+                zerolinecolor='rgba(255, 255, 255, 0.3)',
+                zerolinewidth=2
+            ),
+            plot_bgcolor='rgba(15, 28, 46, 1)',
+            paper_bgcolor='rgba(15, 28, 46, 0)',
+            font=dict(color='#f1f1f1'),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+                bgcolor='rgba(15, 28, 46, 0.5)',
+                bordercolor='rgba(255, 255, 255, 0.2)',
+                borderwidth=1
+            ),
+            margin=dict(l=40, r=40, t=80, b=40),
+            hovermode="x unified"
+        )
+        
+        # Zeige das Diagram
+        st.plotly_chart(fig_time, use_container_width=True, key="performance_time_chart")
         
         # Historical signals table
         st.subheader("Historische Signale")
@@ -330,40 +863,170 @@ elif page == "Performance History":
 elif page == "Contact":
     st.title("Kontakt")
     
-    st.markdown("""
-    ### Haben Sie Fragen oder Anregungen?
-
-    Forex Intelligence ist ein KI-basiertes Tool zur Analyse von Forex-Märkten. Wir freuen uns über Ihr Feedback!
-
-    **E-Mail:** [thomasbrot@proton.me](mailto:thomasbrot@proton.me)
-
-    **Feedback:**
-    """)
+    # Erstelle ein 2-spaltiges Layout für die Kontaktseite
+    contact_col1, contact_col2 = st.columns([3, 2])
     
-    with st.form("feedback_form"):
-        name = st.text_input("Name")
-        email = st.text_input("E-Mail")
-        message = st.text_area("Nachricht")
-        submit_button = st.form_submit_button("Absenden")
+    with contact_col1:
+        # Stylisches Kontaktformular
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, rgba(26, 44, 66, 0.8), rgba(15, 28, 46, 0.9)); 
+                    padding: 25px; border-radius: 15px; 
+                    border-left: 4px solid #00c7b7; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
+            <h3 style="color: #00c7b7; margin-bottom: 20px; font-weight: 600;">Haben Sie Fragen oder Anregungen?</h3>
+            <p style="margin-bottom: 20px;">Forex Intelligence ist ein KI-basiertes Tool zur Analyse von Forex-Märkten. Wir freuen uns über Ihr Feedback!</p>
+            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                <div style="background-color: #00c7b7; border-radius: 50%; height: 36px; width: 36px; display: flex; justify-content: center; align-items: center; margin-right: 15px;">
+                    <span style="color: white; font-size: 18px;">✉️</span>
+                </div>
+                <div>
+                    <p style="margin: 0; font-weight: bold; color: white;">E-Mail:</p>
+                    <p style="margin: 0; color: #00c7b7;"><a href="mailto:thomasbrot@proton.me" style="color: #00c7b7; text-decoration: none;">thomasbrot@proton.me</a></p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        if submit_button:
-            if name and email and message:
-                st.success("Vielen Dank für Ihr Feedback! Wir werden uns bald bei Ihnen melden.")
-            else:
-                st.error("Bitte füllen Sie alle Felder aus.")
+        # Verbessertes Formular
+        st.markdown("<h3 style='color: #00c7b7; margin-top: 30px;'>Feedback-Formular</h3>", unsafe_allow_html=True)
+        
+        with st.form("feedback_form"):
+            # Formularfelder mit verbesserten Beschreibungen
+            name = st.text_input("Name", placeholder="Ihr vollständiger Name")
+            email = st.text_input("E-Mail", placeholder="ihre.email@beispiel.de")
+            subject = st.selectbox("Betreff", options=[
+                "Allgemeines Feedback",
+                "Feature-Vorschlag",
+                "Technisches Problem melden",
+                "Partnerschaftsanfrage",
+                "Sonstiges"
+            ])
+            message = st.text_area("Nachricht", placeholder="Beschreiben Sie Ihr Anliegen detailliert...", height=150)
+            
+            # Datenschutzhinweis
+            st.markdown("""
+            <small style='color: rgba(255, 255, 255, 0.7);'>
+            Mit dem Absenden stimmen Sie zu, dass Ihre Daten zur Bearbeitung Ihrer Anfrage gespeichert werden.
+            Ihre Daten werden vertraulich behandelt und nicht an Dritte weitergegeben.
+            </small>
+            """, unsafe_allow_html=True)
+            
+            # Verbesserter Submit-Button
+            submit_button = st.form_submit_button("Nachricht senden")
+            
+            if submit_button:
+                if name and email and message:
+                    st.success("✅ Vielen Dank für Ihr Feedback! Wir werden uns innerhalb von 48 Stunden bei Ihnen melden.")
+                else:
+                    st.error("⚠️ Bitte füllen Sie alle erforderlichen Felder aus.")
     
+    with contact_col2:
+        # Epische Visualisierung für die Kontaktseite
+        # Erstelle ein Plotly-Diagramm, das Währungssymbole visualisiert
+        
+        import random
+        import numpy as np
+        
+        # Erstelle ein beeindruckendes 3D-Scatter-Diagramm mit Währungssymbolen
+        forex_symbols = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 'EUR/GBP', 'AUD/USD', 'USD/CAD', 'NZD/USD']
+        n_points = 100
+        
+        # Generiere Zufallsdaten für 3D-Scatter
+        random.seed(42)  # Für konsistente Visualisierung
+        x = np.random.normal(0, 1, n_points)
+        y = np.random.normal(0, 1, n_points)
+        z = np.random.normal(0, 1, n_points)
+        
+        # Wähle zufällige Symbole
+        symbols = [random.choice(forex_symbols) for _ in range(n_points)]
+        
+        # Erstelle 3D-Scatter-Plot
+        fig = go.Figure(data=[go.Scatter3d(
+            x=x,
+            y=y,
+            z=z,
+            mode='markers+text',
+            marker=dict(
+                size=8,
+                color=z,
+                colorscale='Turbo',
+                opacity=0.8,
+                colorbar=dict(title="Market Volatility"),
+                symbol='circle',
+            ),
+            text=symbols,
+            hoverinfo='text'
+        )])
+        
+        # Layout anpassen
+        fig.update_layout(
+            title=dict(
+                text="Forex Markt Visualisierung",
+                font=dict(size=22, color="#00c7b7", family="Arial Black"),
+                x=0.5,
+                y=0.95
+            ),
+            margin=dict(l=0, r=0, b=0, t=50),
+            scene=dict(
+                xaxis=dict(
+                    showbackground=False,
+                    showticklabels=False,
+                    title=''
+                ),
+                yaxis=dict(
+                    showbackground=False,
+                    showticklabels=False,
+                    title=''
+                ),
+                zaxis=dict(
+                    showbackground=False,
+                    showticklabels=False,
+                    title=''
+                ),
+                bgcolor='rgba(15, 28, 46, 0)'
+            ),
+            paper_bgcolor='rgba(15, 28, 46, 0)',
+            plot_bgcolor='rgba(15, 28, 46, 0)',
+            font=dict(color='#f1f1f1'),
+            autosize=True,
+            height=500
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Über-Box mit Schattierung und Highlight-Effekten
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, rgba(26, 44, 66, 0.8), rgba(15, 28, 46, 0.9));
+                    padding: 25px; border-radius: 15px; margin-top: 20px; 
+                    border-right: 4px solid #00c7b7; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
+            <h3 style="color: #00c7b7; margin-bottom: 20px; font-weight: 600;">Über Forex Intelligence</h3>
+            
+            <p style="margin-bottom: 15px;">Forex Intelligence nutzt fortschrittliche KI-Algorithmen, um Forex-Märkte zu analysieren und präzise Handelssignale zu generieren.</p>
+            
+            <h4 style="color: #ffcc00; margin: 20px 0 10px 0; font-weight: 500;">Features:</h4>
+            <ul style="list-style-type: none; padding-left: 0;">
+                <li style="padding: 6px 0; display: flex; align-items: center;">
+                    <span style="color: #00c7b7; margin-right: 10px;">▶</span> KI-gestützte Marktanalyse in Echtzeit
+                </li>
+                <li style="padding: 6px 0; display: flex; align-items: center;">
+                    <span style="color: #00c7b7; margin-right: 10px;">▶</span> Trading Signale mit Stop-Loss und Take-Profit
+                </li>
+                <li style="padding: 6px 0; display: flex; align-items: center;">
+                    <span style="color: #00c7b7; margin-right: 10px;">▶</span> Risikoanalyse mit Konfidenz-Bewertungen
+                </li>
+                <li style="padding: 6px 0; display: flex; align-items: center;">
+                    <span style="color: #00c7b7; margin-right: 10px;">▶</span> Performance-Tracking und -Analyse
+                </li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Disclaimer am Ende der Seite
     st.markdown("""
-    ### Über Forex Intelligence
-
-    Forex Intelligence ist ein KI-Tool, das fortschrittliche Algorithmen nutzt, um Forex-Märkte zu analysieren und Handelssignale zu generieren.
-
-    **Features:**
-    - KI-gestützte Marktanalyse in Echtzeit
-    - Trading Signale mit Stop-Loss und Take-Profit Werten
-    - Risikoanalyse mit Konfidenz-Bewertungen
-    - Performance-Tracking und -Analyse
-
-    **Haftungsausschluss:** 
-    Forex Intelligence bietet keine professionelle Finanzberatung. Alle Signale basieren auf Algorithmen und historischen Daten. 
-    Trading auf den Forex-Märkten beinhaltet Risiken und kann zum Verlust Ihres investierten Kapitals führen.
-    """)
+    <div style="margin-top: 40px; padding: 15px; background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; text-align: center;">
+        <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9em;">
+            <strong>Haftungsausschluss:</strong> Forex Intelligence bietet keine professionelle Finanzberatung. 
+            Alle Signale basieren auf Algorithmen und historischen Daten. 
+            Trading auf den Forex-Märkten beinhaltet Risiken und kann zum Verlust Ihres investierten Kapitals führen.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
