@@ -1,6 +1,5 @@
 [build]
   command = """
-  pip install -r requirements-netlify.txt
   mkdir -p build
   cp index.html build/
   cp -r assets build/
@@ -8,19 +7,16 @@
   publish = "build/"
 
 [build.environment]
-  PYTHONUNBUFFERED = "1"
   NODE_VERSION = "18"
 
-[[plugins]]
-  package = "@netlify/plugin-functions-install-core"
+[[redirects]]
+  from = "/*"
+  to = "https://forex-intelligence-app.streamlit.app"
+  status = 301
+  force = true
 
 [[redirects]]
   from = "/app/*"
   to = "https://forex-intelligence-app.streamlit.app/:splat"
   status = 301
   force = true
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/redirect"
-  status = 200

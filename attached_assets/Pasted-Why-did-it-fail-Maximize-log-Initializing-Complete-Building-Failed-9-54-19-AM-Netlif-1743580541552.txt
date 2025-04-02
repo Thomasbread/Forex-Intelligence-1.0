@@ -1,0 +1,312 @@
+Why did it fail?
+
+
+
+
+Maximize log
+Initializing
+Complete
+Building
+Failed
+9:54:19 AM: Netlify Build                                                 
+9:54:19 AM: ────────────────────────────────────────────────────────────────
+9:54:19 AM: ​
+9:54:19 AM: ❯ Version
+9:54:19 AM:   @netlify/build 30.0.6
+9:54:19 AM: ​
+9:54:19 AM: ❯ Flags
+9:54:19 AM:   accountId: 67d35306b798536ef61c2e29
+9:54:19 AM:   baseRelDir: true
+9:54:19 AM:   buildId: 67ececacce6008eda556ba99
+9:54:19 AM:   deployId: 67ececacce6008eda556ba9b
+9:54:19 AM: ​
+9:54:19 AM: ❯ Current directory
+9:54:19 AM:   /opt/build/repo
+9:54:19 AM: ​
+9:54:19 AM: ❯ Config file
+9:54:19 AM:   /opt/build/repo/netlify.toml
+9:54:19 AM: ​
+9:54:19 AM: ❯ Context
+9:54:19 AM:   production
+9:54:21 AM: Installing functions dependencies
+9:54:22 AM: ​
+9:54:22 AM: build.command from netlify.toml                               
+9:54:22 AM: ────────────────────────────────────────────────────────────────
+9:54:22 AM: ​
+9:54:22 AM: $   pip install -r requirements-netlify.txt
+9:54:22 AM:   mkdir -p build
+9:54:22 AM:   cp index.html build/
+9:54:22 AM:   cp -r assets build/
+9:54:22 AM:   
+9:54:26 AM: Collecting streamlit==1.31.0 (from -r requirements-netlify.txt (line 1))
+9:54:26 AM:   Downloading streamlit-1.31.0-py2.py3-none-any.whl.metadata (8.1 kB)
+9:54:26 AM: Collecting pandas==2.2.0 (from -r requirements-netlify.txt (line 2))
+9:54:26 AM:   Downloading pandas-2.2.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (19 kB)
+9:54:26 AM: Collecting numpy==1.26.0 (from -r requirements-netlify.txt (line 3))
+9:54:26 AM:   Downloading numpy-1.26.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (58 kB)
+9:54:26 AM: Collecting yfinance==0.2.32 (from -r requirements-netlify.txt (line 4))
+9:54:26 AM:   Downloading yfinance-0.2.32-py2.py3-none-any.whl.metadata (11 kB)
+9:54:26 AM: Collecting plotly==5.18.0 (from -r requirements-netlify.txt (line 5))
+9:54:26 AM:   Downloading plotly-5.18.0-py3-none-any.whl.metadata (7.0 kB)
+9:54:26 AM: Collecting gunicorn==21.2.0 (from -r requirements-netlify.txt (line 6))
+9:54:26 AM:   Downloading gunicorn-21.2.0-py3-none-any.whl.metadata (4.1 kB)
+9:54:26 AM: Collecting altair<6,>=4.0 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:26 AM:   Downloading altair-5.5.0-py3-none-any.whl.metadata (11 kB)
+9:54:26 AM: Collecting blinker<2,>=1.0.0 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:26 AM:   Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+9:54:26 AM: Collecting cachetools<6,>=4.0 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:26 AM:   Downloading cachetools-5.5.2-py3-none-any.whl.metadata (5.4 kB)
+9:54:26 AM: Collecting click<9,>=7.0 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:26 AM:   Downloading click-8.1.8-py3-none-any.whl.metadata (2.3 kB)
+9:54:26 AM: Collecting importlib-metadata<8,>=1.4 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:26 AM:   Downloading importlib_metadata-7.2.1-py3-none-any.whl.metadata (4.6 kB)
+9:54:26 AM: Collecting packaging<24,>=16.8 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:26 AM:   Downloading packaging-23.2-py3-none-any.whl.metadata (3.2 kB)
+9:54:27 AM: Collecting pillow<11,>=7.1.0 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading pillow-10.4.0-cp39-cp39-manylinux_2_28_x86_64.whl.metadata (9.2 kB)
+9:54:27 AM: Collecting protobuf<5,>=3.20 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading protobuf-4.25.6-cp37-abi3-manylinux2014_x86_64.whl.metadata (541 bytes)
+9:54:27 AM: Collecting pyarrow>=7.0 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading pyarrow-19.0.1-cp39-cp39-manylinux_2_28_x86_64.whl.metadata (3.3 kB)
+9:54:27 AM: Collecting python-dateutil<3,>=2.7.3 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+9:54:27 AM: Collecting requests<3,>=2.27 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading requests-2.32.3-py3-none-any.whl.metadata (4.6 kB)
+9:54:27 AM: Collecting rich<14,>=10.14.0 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading rich-13.9.4-py3-none-any.whl.metadata (18 kB)
+9:54:27 AM: Collecting tenacity<9,>=8.1.0 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading tenacity-8.5.0-py3-none-any.whl.metadata (1.2 kB)
+9:54:27 AM: Collecting toml<2,>=0.10.1 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading toml-0.10.2-py2.py3-none-any.whl.metadata (7.1 kB)
+9:54:27 AM: Collecting typing-extensions<5,>=4.3.0 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading typing_extensions-4.13.0-py3-none-any.whl.metadata (3.0 kB)
+9:54:27 AM: Collecting tzlocal<6,>=1.1 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading tzlocal-5.3.1-py3-none-any.whl.metadata (7.6 kB)
+9:54:27 AM: Collecting validators<1,>=0.2 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading validators-0.34.0-py3-none-any.whl.metadata (3.8 kB)
+9:54:27 AM: Collecting gitpython!=3.1.19,<4,>=3.0.7 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading GitPython-3.1.44-py3-none-any.whl.metadata (13 kB)
+9:54:27 AM: Collecting pydeck<1,>=0.8.0b4 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:27 AM:   Downloading pydeck-0.9.1-py2.py3-none-any.whl.metadata (4.1 kB)
+9:54:28 AM: Collecting tornado<7,>=6.0.3 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:28 AM:   Downloading tornado-6.4.2-cp38-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.5 kB)
+9:54:28 AM: Collecting watchdog>=2.1.5 (from streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:28 AM:   Downloading watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl.metadata (44 kB)
+9:54:28 AM: Collecting pytz>=2020.1 (from pandas==2.2.0->-r requirements-netlify.txt (line 2))
+9:54:28 AM:   Downloading pytz-2025.2-py2.py3-none-any.whl.metadata (22 kB)
+9:54:28 AM: Collecting tzdata>=2022.7 (from pandas==2.2.0->-r requirements-netlify.txt (line 2))
+9:54:28 AM:   Downloading tzdata-2025.2-py2.py3-none-any.whl.metadata (1.4 kB)
+9:54:28 AM: Collecting multitasking>=0.0.7 (from yfinance==0.2.32->-r requirements-netlify.txt (line 4))
+9:54:28 AM:   Downloading multitasking-0.0.11-py3-none-any.whl.metadata (5.5 kB)
+9:54:28 AM: Collecting lxml>=4.9.1 (from yfinance==0.2.32->-r requirements-netlify.txt (line 4))
+9:54:28 AM:   Downloading lxml-5.3.1-cp39-cp39-manylinux_2_28_x86_64.whl.metadata (3.7 kB)
+9:54:28 AM: Collecting appdirs>=1.4.4 (from yfinance==0.2.32->-r requirements-netlify.txt (line 4))
+9:54:28 AM:   Downloading appdirs-1.4.4-py2.py3-none-any.whl.metadata (9.0 kB)
+9:54:28 AM: Collecting frozendict>=2.3.4 (from yfinance==0.2.32->-r requirements-netlify.txt (line 4))
+9:54:28 AM:   Downloading frozendict-2.4.6-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (23 kB)
+9:54:28 AM: Collecting peewee>=3.16.2 (from yfinance==0.2.32->-r requirements-netlify.txt (line 4))
+9:54:28 AM:   Downloading peewee-3.17.9.tar.gz (3.0 MB)
+9:54:28 AM:      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/3.0 MB ? eta -:--:--
+9:54:28 AM:      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.0/3.0 MB 42.0 MB/s eta 0:00:00
+9:54:28 AM:   Installing build dependencies: started
+9:54:30 AM:   Installing build dependencies: finished with status 'done'
+9:54:30 AM:   Getting requirements to build wheel: started
+9:54:30 AM:   Getting requirements to build wheel: finished with status 'done'
+9:54:30 AM:   Preparing metadata (pyproject.toml): started
+9:54:30 AM:   Preparing metadata (pyproject.toml): finished with status 'done'
+9:54:30 AM: Collecting beautifulsoup4>=4.11.1 (from yfinance==0.2.32->-r requirements-netlify.txt (line 4))
+9:54:30 AM:   Downloading beautifulsoup4-4.13.3-py3-none-any.whl.metadata (3.8 kB)
+9:54:30 AM: Collecting html5lib>=1.1 (from yfinance==0.2.32->-r requirements-netlify.txt (line 4))
+9:54:30 AM:   Downloading html5lib-1.1-py2.py3-none-any.whl.metadata (16 kB)
+9:54:30 AM: Collecting jinja2 (from altair<6,>=4.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:30 AM:   Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+9:54:30 AM: Collecting jsonschema>=3.0 (from altair<6,>=4.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:30 AM:   Downloading jsonschema-4.23.0-py3-none-any.whl.metadata (7.9 kB)
+9:54:31 AM: Collecting narwhals>=1.14.2 (from altair<6,>=4.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading narwhals-1.33.0-py3-none-any.whl.metadata (9.2 kB)
+9:54:31 AM: Collecting soupsieve>1.2 (from beautifulsoup4>=4.11.1->yfinance==0.2.32->-r requirements-netlify.txt (line 4))
+9:54:31 AM:   Downloading soupsieve-2.6-py3-none-any.whl.metadata (4.6 kB)
+9:54:31 AM: Collecting gitdb<5,>=4.0.1 (from gitpython!=3.1.19,<4,>=3.0.7->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading gitdb-4.0.12-py3-none-any.whl.metadata (1.2 kB)
+9:54:31 AM: Collecting six>=1.9 (from html5lib>=1.1->yfinance==0.2.32->-r requirements-netlify.txt (line 4))
+9:54:31 AM:   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+9:54:31 AM: Collecting webencodings (from html5lib>=1.1->yfinance==0.2.32->-r requirements-netlify.txt (line 4))
+9:54:31 AM:   Downloading webencodings-0.5.1-py2.py3-none-any.whl.metadata (2.1 kB)
+9:54:31 AM: Collecting zipp>=0.5 (from importlib-metadata<8,>=1.4->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading zipp-3.21.0-py3-none-any.whl.metadata (3.7 kB)
+9:54:31 AM: Collecting charset-normalizer<4,>=2 (from requests<3,>=2.27->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading charset_normalizer-3.4.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (35 kB)
+9:54:31 AM: Collecting idna<4,>=2.5 (from requests<3,>=2.27->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading idna-3.10-py3-none-any.whl.metadata (10 kB)
+9:54:31 AM: Collecting urllib3<3,>=1.21.1 (from requests<3,>=2.27->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading urllib3-2.3.0-py3-none-any.whl.metadata (6.5 kB)
+9:54:31 AM: Collecting certifi>=2017.4.17 (from requests<3,>=2.27->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading certifi-2025.1.31-py3-none-any.whl.metadata (2.5 kB)
+9:54:31 AM: Collecting markdown-it-py>=2.2.0 (from rich<14,>=10.14.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading markdown_it_py-3.0.0-py3-none-any.whl.metadata (6.9 kB)
+9:54:31 AM: Collecting pygments<3.0.0,>=2.13.0 (from rich<14,>=10.14.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading pygments-2.19.1-py3-none-any.whl.metadata (2.5 kB)
+9:54:31 AM: Collecting smmap<6,>=3.0.1 (from gitdb<5,>=4.0.1->gitpython!=3.1.19,<4,>=3.0.7->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading smmap-5.0.2-py3-none-any.whl.metadata (4.3 kB)
+9:54:31 AM: Collecting MarkupSafe>=2.0 (from jinja2->altair<6,>=4.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading MarkupSafe-3.0.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.0 kB)
+9:54:31 AM: Collecting attrs>=22.2.0 (from jsonschema>=3.0->altair<6,>=4.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading attrs-25.3.0-py3-none-any.whl.metadata (10 kB)
+9:54:31 AM: Collecting jsonschema-specifications>=2023.03.6 (from jsonschema>=3.0->altair<6,>=4.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading jsonschema_specifications-2024.10.1-py3-none-any.whl.metadata (3.0 kB)
+9:54:31 AM: Collecting referencing>=0.28.4 (from jsonschema>=3.0->altair<6,>=4.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:31 AM:   Downloading referencing-0.36.2-py3-none-any.whl.metadata (2.8 kB)
+9:54:32 AM: Collecting rpds-py>=0.7.1 (from jsonschema>=3.0->altair<6,>=4.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:32 AM:   Downloading rpds_py-0.24.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+9:54:32 AM: Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich<14,>=10.14.0->streamlit==1.31.0->-r requirements-netlify.txt (line 1))
+9:54:32 AM:   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+9:54:32 AM: Downloading streamlit-1.31.0-py2.py3-none-any.whl (8.4 MB)
+9:54:32 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/8.4 MB ? eta -:--:--
+9:54:32 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.4/8.4 MB 178.0 MB/s eta 0:00:00
+9:54:32 AM: Downloading pandas-2.2.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (13.0 MB)
+9:54:32 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/13.0 MB ? eta -:--:--
+9:54:32 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.0/13.0 MB 179.2 MB/s eta 0:00:00
+9:54:32 AM: Downloading numpy-1.26.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.2 MB)
+9:54:32 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/18.2 MB ? eta -:--:--
+9:54:32 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 18.2/18.2 MB 109.2 MB/s eta 0:00:00
+9:54:32 AM: Downloading yfinance-0.2.32-py2.py3-none-any.whl (68 kB)
+9:54:32 AM: Downloading plotly-5.18.0-py3-none-any.whl (15.6 MB)
+9:54:32 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/15.6 MB ? eta -:--:--
+9:54:32 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 15.6/15.6 MB 188.2 MB/s eta 0:00:00
+9:54:32 AM: Downloading gunicorn-21.2.0-py3-none-any.whl (80 kB)
+9:54:32 AM: Downloading altair-5.5.0-py3-none-any.whl (731 kB)
+9:54:32 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/731.2 kB ? eta -:--:--
+9:54:32 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 731.2/731.2 kB 18.0 MB/s eta 0:00:00
+9:54:32 AM: Downloading appdirs-1.4.4-py2.py3-none-any.whl (9.6 kB)
+9:54:32 AM: Downloading beautifulsoup4-4.13.3-py3-none-any.whl (186 kB)
+9:54:32 AM: Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+9:54:32 AM: Downloading cachetools-5.5.2-py3-none-any.whl (10 kB)
+9:54:32 AM: Downloading click-8.1.8-py3-none-any.whl (98 kB)
+9:54:32 AM: Downloading frozendict-2.4.6-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (116 kB)
+9:54:32 AM: Downloading GitPython-3.1.44-py3-none-any.whl (207 kB)
+9:54:33 AM: Downloading html5lib-1.1-py2.py3-none-any.whl (112 kB)
+9:54:33 AM: Downloading importlib_metadata-7.2.1-py3-none-any.whl (25 kB)
+9:54:33 AM: Downloading lxml-5.3.1-cp39-cp39-manylinux_2_28_x86_64.whl (5.2 MB)
+9:54:33 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/5.2 MB ? eta -:--:--
+9:54:33 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.2/5.2 MB 67.4 MB/s eta 0:00:00
+9:54:33 AM: Downloading multitasking-0.0.11-py3-none-any.whl (8.5 kB)
+9:54:33 AM: Downloading packaging-23.2-py3-none-any.whl (53 kB)
+9:54:33 AM: Downloading pillow-10.4.0-cp39-cp39-manylinux_2_28_x86_64.whl (4.5 MB)
+9:54:33 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/4.5 MB ? eta -:--:--
+9:54:33 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 156.4 MB/s eta 0:00:00
+9:54:33 AM: Downloading protobuf-4.25.6-cp37-abi3-manylinux2014_x86_64.whl (294 kB)
+9:54:33 AM: Downloading pyarrow-19.0.1-cp39-cp39-manylinux_2_28_x86_64.whl (42.1 MB)
+9:54:33 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/42.1 MB ? eta -:--:--
+9:54:33 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╺━━━━━━━━━━ 30.9/42.1 MB 213.7 MB/s eta 0:00:01
+9:54:33 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 42.1/42.1 MB 118.6 MB/s eta 0:00:00
+9:54:33 AM: Downloading pydeck-0.9.1-py2.py3-none-any.whl (6.9 MB)
+9:54:33 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/6.9 MB ? eta -:--:--
+9:54:33 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.9/6.9 MB 148.0 MB/s eta 0:00:00
+9:54:33 AM: Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+9:54:33 AM: Downloading pytz-2025.2-py2.py3-none-any.whl (509 kB)
+9:54:33 AM: Downloading requests-2.32.3-py3-none-any.whl (64 kB)
+9:54:33 AM: Downloading rich-13.9.4-py3-none-any.whl (242 kB)
+9:54:33 AM: Downloading tenacity-8.5.0-py3-none-any.whl (28 kB)
+9:54:33 AM: Downloading toml-0.10.2-py2.py3-none-any.whl (16 kB)
+9:54:33 AM: Downloading tornado-6.4.2-cp38-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (437 kB)
+9:54:33 AM: Downloading typing_extensions-4.13.0-py3-none-any.whl (45 kB)
+9:54:33 AM: Downloading tzdata-2025.2-py2.py3-none-any.whl (347 kB)
+9:54:33 AM: Downloading tzlocal-5.3.1-py3-none-any.whl (18 kB)
+9:54:33 AM: Downloading validators-0.34.0-py3-none-any.whl (43 kB)
+9:54:33 AM: Downloading watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl (79 kB)
+9:54:34 AM: Downloading certifi-2025.1.31-py3-none-any.whl (166 kB)
+9:54:34 AM: Downloading charset_normalizer-3.4.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (146 kB)
+9:54:34 AM: Downloading gitdb-4.0.12-py3-none-any.whl (62 kB)
+9:54:34 AM: Downloading idna-3.10-py3-none-any.whl (70 kB)
+9:54:34 AM: Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+9:54:34 AM: Downloading jsonschema-4.23.0-py3-none-any.whl (88 kB)
+9:54:34 AM: Downloading markdown_it_py-3.0.0-py3-none-any.whl (87 kB)
+9:54:34 AM: Downloading narwhals-1.33.0-py3-none-any.whl (322 kB)
+9:54:34 AM: Downloading pygments-2.19.1-py3-none-any.whl (1.2 MB)
+9:54:34 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0.0/1.2 MB ? eta -:--:--
+9:54:34 AM:    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 73.4 MB/s eta 0:00:00
+9:54:34 AM: Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+9:54:34 AM: Downloading soupsieve-2.6-py3-none-any.whl (36 kB)
+9:54:34 AM: Downloading urllib3-2.3.0-py3-none-any.whl (128 kB)
+9:54:34 AM: Downloading zipp-3.21.0-py3-none-any.whl (9.6 kB)
+9:54:34 AM: Downloading webencodings-0.5.1-py2.py3-none-any.whl (11 kB)
+9:54:34 AM: Downloading attrs-25.3.0-py3-none-any.whl (63 kB)
+9:54:34 AM: Downloading jsonschema_specifications-2024.10.1-py3-none-any.whl (18 kB)
+9:54:34 AM: Downloading MarkupSafe-3.0.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (20 kB)
+9:54:34 AM: Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+9:54:34 AM: Downloading referencing-0.36.2-py3-none-any.whl (26 kB)
+9:54:34 AM: Downloading rpds_py-0.24.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (390 kB)
+9:54:34 AM: Downloading smmap-5.0.2-py3-none-any.whl (24 kB)
+9:54:34 AM: Building wheels for collected packages: peewee
+9:54:34 AM:   Building wheel for peewee (pyproject.toml): started
+9:54:44 AM:   Building wheel for peewee (pyproject.toml): finished with status 'done'
+9:54:44 AM:   Created wheel for peewee: filename=peewee-3.17.9-cp39-cp39-linux_x86_64.whl size=993931 sha256=7f55b6554c26fd96fb2476c629d5a148aaf49d29902536f64dcca887f834973d
+9:54:44 AM:   Stored in directory: /opt/buildhome/.cache/pip/wheels/95/bb/20/859b0853d3683815ccb6342d9ac5a49380a681c96285821184
+9:54:44 AM: Successfully built peewee
+9:54:44 AM: Installing collected packages: webencodings, pytz, peewee, multitasking, appdirs, zipp, watchdog, validators, urllib3, tzlocal, tzdata, typing-extensions, tornado, toml, tenacity, soupsieve, smmap, six, rpds-py, pygments, pyarrow, protobuf, pillow, packaging, numpy, narwhals, mdurl, MarkupSafe, lxml, idna, frozendict, click, charset-normalizer, certifi, cachetools, blinker, attrs, requests, referencing, python-dateutil, plotly, markdown-it-py, jinja2, importlib-metadata, html5lib, gunicorn, gitdb, beautifulsoup4, rich, pydeck, pandas, jsonschema-specifications, gitpython, yfinance, jsonschema, altair, streamlit
+9:55:01 AM: Failed during stage 'building site': Build script returned non-zero exit code: 2 (https://ntl.fyi/exit-code-2)
+9:55:00 AM: Successfully installed MarkupSafe-3.0.2 altair-5.5.0 appdirs-1.4.4 attrs-25.3.0 beautifulsoup4-4.13.3 blinker-1.9.0 cachetools-5.5.2 certifi-2025.1.31 charset-normalizer-3.4.1 click-8.1.8 frozendict-2.4.6 gitdb-4.0.12 gitpython-3.1.44 gunicorn-21.2.0 html5lib-1.1 idna-3.10 importlib-metadata-7.2.1 jinja2-3.1.6 jsonschema-4.23.0 jsonschema-specifications-2024.10.1 lxml-5.3.1 markdown-it-py-3.0.0 mdurl-0.1.2 multitasking-0.0.11 narwhals-1.33.0 numpy-1.26.0 packaging-23.2 pandas-2.2.0 peewee-3.17.9 pillow-10.4.0 plotly-5.18.0 protobuf-4.25.6 pyarrow-19.0.1 pydeck-0.9.1 pygments-2.19.1 python-dateutil-2.9.0.post0 pytz-2025.2 referencing-0.36.2 requests-2.32.3 rich-13.9.4 rpds-py-0.24.0 six-1.17.0 smmap-5.0.2 soupsieve-2.6 streamlit-1.31.0 tenacity-8.5.0 toml-0.10.2 tornado-6.4.2 typing-extensions-4.13.0 tzdata-2025.2 tzlocal-5.3.1 urllib3-2.3.0 validators-0.34.0 watchdog-6.0.0 webencodings-0.5.1 yfinance-0.2.32 zipp-3.21.0
+9:55:00 AM: [notice] A new release of pip is available: 24.3.1 -> 25.0.1
+9:55:00 AM: [notice] To update, run: pip install --upgrade pip
+9:55:00 AM: ​
+9:55:00 AM: (build.command completed in 38.4s)
+9:55:00 AM: ​
+9:55:00 AM: Functions bundling                                            
+9:55:00 AM: ────────────────────────────────────────────────────────────────
+9:55:00 AM: ​
+9:55:00 AM: Packaging Functions from netlify/functions directory:
+9:55:00 AM:  - redirect.js
+9:55:00 AM:  - streamlit.js
+9:55:00 AM: ​
+9:55:00 AM: ​
+9:55:00 AM: Dependencies installation error                               
+9:55:00 AM: ────────────────────────────────────────────────────────────────
+9:55:00 AM: ​
+9:55:00 AM:   Error message
+9:55:00 AM:   A Netlify Function is using "serverless-http" but that dependency has not been installed yet.
+9:55:00 AM: ​
+9:55:00 AM:   By default, dependencies inside a Netlify Function's "package.json" are not automatically installed.
+  There are several ways to fix this problem:
+9:55:00 AM:     - Removing your Function's "package.json" and adding the dependencies to the project's top-level "package.json" instead. This is the fastest and safest solution.
+9:55:00 AM:     - Running "npm install" or "yarn" inside your Netlify Function in your build command.
+9:55:00 AM:     - Adding the following plugin to your "netlify.toml":
+9:55:00 AM: ​
+9:55:00 AM:   [[plugins]]
+9:55:00 AM:   package = "@netlify/plugin-functions-install-core"
+9:55:00 AM: ​​
+9:55:00 AM:   In file "/opt/build/repo/netlify/functions/streamlit.js"
+9:55:00 AM:   Cannot find module 'serverless-http'
+9:55:00 AM:   Require stack:
+9:55:00 AM:   - /opt/buildhome/node-deps/node_modules/@netlify/zip-it-and-ship-it/dist/runtimes/node/bundlers/zisi/resolve.js
+9:55:00 AM: ​
+9:55:00 AM:   Resolved config
+9:55:00 AM:   build:
+9:55:00 AM:     command: |2-
+9:55:00 AM:         pip install -r requirements-netlify.txt
+9:55:00 AM:         mkdir -p build
+9:55:00 AM:         cp index.html build/
+9:55:00 AM:         cp -r assets build/
+9:55:00 AM: ​
+9:55:00 AM:     commandOrigin: config
+9:55:00 AM:     environment:
+9:55:00 AM:       - PYTHONUNBUFFERED
+9:55:00 AM:       - NODE_VERSION
+9:55:00 AM:     publish: /opt/build/repo/build
+9:55:00 AM:     publishOrigin: config
+9:55:00 AM:   functionsDirectory: /opt/build/repo/netlify/functions
+9:55:00 AM:   plugins:
+9:55:00 AM:     - inputs: {}
+9:55:00 AM:       origin: config
+9:55:00 AM:       package: '@netlify/plugin-functions-install-core'
+9:55:00 AM:   redirects:
+9:55:00 AM:     - force: true
+9:55:01 AM:       from: /app/*
+      status: 301
+      to: https://forex-intelligence-app.streamlit.app/:splat
+    - from: /api/*
+      status: 200
+      to: /.netlify/functions/redirect
+  redirectsOrigin: config
+9:55:01 AM: Build failed due to a user error: Build script returned non-zero exit code: 2
+9:55:01 AM: Failing build: Failed to build site
+9:55:01 AM: Finished processing build request in 55.865s
