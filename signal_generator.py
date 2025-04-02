@@ -6,38 +6,29 @@ from datetime import datetime, timedelta
 from data_handler import get_forex_data, calculate_indicators, get_market_sentiment
 from performance_tracker import update_performance
 
-def generate_signals(available_pairs, max_signals=1):
+def generate_signals(available_pairs, max_signals=10):
     """
     Generate trading signals based on market analysis.
     
     Args:
         available_pairs (list): List of available currency pairs
-        max_signals (int): Maximum number of signals to generate (default: 1)
+        max_signals (int): Maximum number of signals to generate
         
     Returns:
         pandas.DataFrame: Generated trading signals
     """
     signals = []
     
-    # Check when the last signal was generated (at least 5 minutes between signals)
-    last_signal_time = datetime.now() - timedelta(minutes=5)
-    if 'last_signal_time' in globals():
-        time_since_last = datetime.now() - globals()['last_signal_time']
-        if time_since_last.total_seconds() < 300:  # 300 seconds = 5 minutes
-            # Not enough time has passed, return empty DataFrame
-            return pd.DataFrame()
+    # Determine how many signals to generate (2-10 per day)
+    num_signals = random.randint(2, max_signals)
     
-    # We'll only generate ONE highly confident signal (if conditions are met)
-    # Shuffle pairs to analyze them in random order
+    # Shuffle pairs to get random selection
     random.shuffle(available_pairs)
+    selected_pairs = available_pairs[:num_signals]
     
-    # Find the best possible signal from all pairs
-    best_signal = None
-    best_confidence_score = 0
-    
-    for pair in available_pairs:
-        # Get forex data for analysis (more data for better analysis)
-        data = get_forex_data(pair, '1h', 200)
+    for pair in selected_pairs:
+        # Get forex data for analysis
+        data = get_forex_data(pair, '1h', 100)
         
         if data.empty:
             continue
@@ -49,31 +40,10 @@ def generate_signals(available_pairs, max_signals=1):
         sentiment = get_market_sentiment(pair)
         
         # Generate signal based on analysis
-        signal = analyze_market(pair, data_with_indicators, sentiment, require_high_confidence=True)
+        signal = analyze_market(pair, data_with_indicators, sentiment)
         
         if signal:
-            # Calculate confidence score
-            confidence_score = 0
-            if signal['confidence'] == 'sicher':
-                confidence_score = 3
-            elif signal['confidence'] == 'mittel':
-                confidence_score = 2
-            else:
-                confidence_score = 1
-                
-            # Additional score from sentiment strength
-            confidence_score += sentiment['trend_strength'] * 2
-            
-            # Keep the best signal
-            if confidence_score > best_confidence_score:
-                best_signal = signal
-                best_confidence_score = confidence_score
-    
-    # Only add the signal if it's confident enough
-    if best_signal and best_confidence_score >= 3:
-        signals.append(best_signal)
-        # Update the last signal time globally
-        globals()['last_signal_time'] = datetime.now()
+            signals.append(signal)
     
     # Convert to DataFrame
     if signals:
@@ -86,7 +56,7 @@ def generate_signals(available_pairs, max_signals=1):
     else:
         return pd.DataFrame()
 
-def analyze_market(pair, data, sentiment, require_high_confidence=False):
+def analyze_market(pair, data, sentiment):
     """
     Analyze market data and generate a trading signal if conditions are met.
     
@@ -94,7 +64,6 @@ def analyze_market(pair, data, sentiment, require_high_confidence=False):
         pair (str): Currency pair
         data (pandas.DataFrame): OHLC data with indicators
         sentiment (dict): Market sentiment data
-        require_high_confidence (bool): If True, only return signals with high confidence
         
     Returns:
         dict: Trading signal if generated, None otherwise
@@ -204,10 +173,6 @@ def analyze_market(pair, data, sentiment, require_high_confidence=False):
         # Generate analysis text
         analysis = generate_analysis_text(pair, action, data, sentiment, signal_strength)
         
-        # Check if we need high confidence signals only
-        if require_high_confidence and confidence != 'sicher':
-            return None
-            
         # Create signal
         return {
             'pair': pair,

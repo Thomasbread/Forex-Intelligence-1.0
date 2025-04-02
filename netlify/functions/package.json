@@ -1,7 +1,0 @@
-{
-  "name": "forex-intelligence-functions",
-  "version": "1.0.0",
-  "description": "Netlify Functions for Forex Intelligence App",
-  "main": "redirect.js",
-  "dependencies": {}
-}

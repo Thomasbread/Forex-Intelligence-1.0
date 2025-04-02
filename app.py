@@ -25,77 +25,20 @@ if 'viewed_signals' not in st.session_state:
 if 'last_update' not in st.session_state:
     st.session_state.last_update = datetime.now() - timedelta(hours=1)
 
-# Verbesserte Navigation
-st.sidebar.markdown("## 📊 Forex Intelligence")
-
-# Navigation Buttons mit Icons und hervorgehobenem Stil
-col1, col2, col3 = st.sidebar.columns(3)
-
-if 'page' not in st.session_state:
-    st.session_state.page = "Trading Signals"
-
-# Styling für aktive Navigation
-nav_style_active = """
-<style>
-    .nav-active {
-        background-color: #1E88E5;
-        color: white !important;
-        border-radius: 10px;
-        padding: 10px;
-        text-align: center;
-        margin: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    .nav-inactive {
-        background-color: #F0F2F6;
-        color: #31333F !important;
-        border-radius: 10px;
-        padding: 10px;
-        text-align: center;
-        margin: 5px;
-        cursor: pointer;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .nav-inactive:hover {
-        background-color: #E0E2E6;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-    }
-</style>
-"""
-st.markdown(nav_style_active, unsafe_allow_html=True)
-
-# Signals Button
-signals_class = "nav-active" if st.session_state.page == "Trading Signals" else "nav-inactive"
-if col1.markdown(f'<div class="{signals_class}">🔍<br>Signale</div>', unsafe_allow_html=True):
-    st.session_state.page = "Trading Signals"
-    st.rerun()
-
-# Performance Button
-performance_class = "nav-active" if st.session_state.page == "Performance History" else "nav-inactive"
-if col2.markdown(f'<div class="{performance_class}">📈<br>Performance</div>', unsafe_allow_html=True):
-    st.session_state.page = "Performance History"
-    st.rerun()
-
-# Contact Button
-contact_class = "nav-active" if st.session_state.page == "Contact" else "nav-inactive"
-if col3.markdown(f'<div class="{contact_class}">📧<br>Kontakt</div>', unsafe_allow_html=True):
-    st.session_state.page = "Contact"
-    st.rerun()
-
-# Setze den Seiteninhalt basierend auf st.session_state.page
-page = st.session_state.page
+# Sidebar navigation
+page = st.sidebar.selectbox(
+    "Navigation",
+    ["Trading Signals", "Performance History", "Contact"]
+)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 🕒 Markt Update")
+st.sidebar.markdown("### Markt Update")
 # Show last update time
 last_update_time = st.session_state.last_update.strftime("%d.%m.%Y %H:%M:%S")
 st.sidebar.text(f"Letztes Update: {last_update_time}")
 
-# Update button with better styling
-update_button = st.sidebar.button("🔄 Aktualisieren", use_container_width=True)
-if update_button:
+# Update button
+if st.sidebar.button("Aktualisieren"):
     st.session_state.last_update = datetime.now()
     st.rerun()
 
