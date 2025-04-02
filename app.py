@@ -72,20 +72,25 @@ if page == "Trading Signals":
     # Get real forex data for available pairs
     available_pairs = get_available_pairs()
     
-    # Generate signals
+    # Generate signals - multiple signals with different confidence levels
     with st.spinner("Analysiere Marktdaten..."):
-        signals = generate_signals(available_pairs)
+        signals = generate_signals(available_pairs, max_signals=5)  # Generate up to 5 signals
     
-    # If we have new signals, store the latest signal
+    # If we have new signals, store them
     if not signals.empty:
-        signal_to_display = signals.iloc[0].to_dict()
-        st.session_state.last_signal = signal_to_display
-        
-        # Add timestamp for recent signals tracking
-        signal_to_display['generated_at'] = datetime.now()
-        
-        # Add to recent signals list
-        st.session_state.recent_signals.append(signal_to_display)
+        # Convert all signals to dict and add to recent signals
+        for _, signal_row in signals.iterrows():
+            signal_dict = signal_row.to_dict()
+            
+            # Store the best signal (highest confidence) as last_signal
+            if not st.session_state.last_signal or signal_row.name == 0:
+                st.session_state.last_signal = signal_dict
+            
+            # Add timestamp for recent signals tracking
+            signal_dict['generated_at'] = datetime.now()
+            
+            # Add to recent signals list
+            st.session_state.recent_signals.append(signal_dict)
     
     # Clean up old signals (keep only signals from the last 20 minutes)
     current_time = datetime.now()

@@ -6,22 +6,20 @@ from datetime import datetime, timedelta
 from data_handler import get_forex_data, calculate_indicators, get_market_sentiment
 from performance_tracker import update_performance
 
-def generate_signals(available_pairs, max_signals=1):
+def generate_signals(available_pairs, max_signals=5):
     """
     Generate trading signals based on market analysis.
     
     Args:
         available_pairs (list): List of available currency pairs
-        max_signals (int): Maximum number of signals to generate (Default: 1)
+        max_signals (int): Maximum number of signals to generate (Default: 5)
         
     Returns:
         pandas.DataFrame: Generated trading signals
     """
-    signals = []
-    best_signal = None
-    best_confidence_score = 0
+    all_signals = []
     
-    # Analyze all pairs but only keep the best signal
+    # Collect signals for all pairs
     for pair in available_pairs:
         # Get forex data for analysis
         data = get_forex_data(pair, '1h', 100)
@@ -39,26 +37,50 @@ def generate_signals(available_pairs, max_signals=1):
         signal = analyze_market(pair, data_with_indicators, sentiment)
         
         if signal:
-            # Calculate a confidence score for comparison
-            confidence_score = 0
-            if signal['confidence'] == 'sicher':
-                confidence_score = 3
-            elif signal['confidence'] == 'mittel':
-                confidence_score = 2
-            else:
-                confidence_score = 1
-                
-            # Add randomness to avoid always selecting the same pair
-            confidence_score += random.uniform(0, 0.5)
+            # Add some randomness to the signal timing to create variety
+            random_offset = random.uniform(-0.3, 0.3)
             
-            # If this is the best signal so far, keep it
-            if confidence_score > best_confidence_score:
-                best_signal = signal
-                best_confidence_score = confidence_score
+            # Add a slight randomization to confidence to create variety in signals
+            confidence_roll = random.random()
+            if confidence_roll > 0.7 and signal['confidence'] != 'sicher':  # 30% chance to upgrade unsicher signals 
+                if signal['confidence'] == 'unsicher':
+                    signal['confidence'] = 'mittel'
+                elif signal['confidence'] == 'mittel':
+                    signal['confidence'] = 'sicher'
+            elif confidence_roll < 0.3 and signal['confidence'] != 'unsicher':  # 30% chance to downgrade sicher signals
+                if signal['confidence'] == 'sicher':
+                    signal['confidence'] = 'mittel'
+                elif signal['confidence'] == 'mittel':
+                    signal['confidence'] = 'unsicher'
+            
+            # Update the analysis text based on the confidence level
+            if 'analysis' in signal:
+                confidence_text = signal['confidence'].upper()
+                if signal['confidence'] == 'sicher':
+                    confidence_text = "HOHE KONFIDENZ"
+                elif signal['confidence'] == 'mittel':
+                    confidence_text = "MITTLERE KONFIDENZ"
+                else:
+                    confidence_text = "NIEDRIGE KONFIDENZ"
+                
+                # Define direction_text for our analysis template
+                direction_text = "bullisch" if signal['action'] == "buy" else "bearisch"
+                
+                # Replace the first line of the analysis with the updated confidence level
+                signal['analysis'] = signal['analysis'].replace(
+                    f"**{signal['pair']} {direction_text.upper()} SIGNAL - HOHE KONFIDENZ**", 
+                    f"**{signal['pair']} {direction_text.upper()} SIGNAL - {confidence_text}**"
+                )
+            
+            all_signals.append(signal)
     
-    # Only use the signal if it's "sicher" (secure)
-    if best_signal and best_signal['confidence'] == 'sicher':
-        signals.append(best_signal)
+    # Sort signals by confidence and limit to max_signals
+    sorted_signals = sorted(all_signals, key=lambda x: 
+                           (0 if x['confidence'] == 'sicher' else 
+                            1 if x['confidence'] == 'mittel' else 2))
+    
+    # Take the top signals up to max_signals
+    signals = sorted_signals[:max_signals]
     
     # Convert to DataFrame
     if signals:
@@ -425,9 +447,8 @@ def analyze_market(pair, data, sentiment):
         else:
             confidence = 'unsicher'
             
-        # Only return 'sicher' signals
-        if confidence != 'sicher':
-            return None
+        # Return all signals, not just 'sicher' ones
+        # Now we return signals of all confidence levels
         
         # Generate detailed analysis text
         # Use the original analysis function for backward compatibility
