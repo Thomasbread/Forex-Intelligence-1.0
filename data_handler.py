@@ -146,6 +146,7 @@ def calculate_indicators(data):
     Calculate technical indicators on the provided OHLC data.
     Erweiterte Version mit verbesserter Support/Resistance-Erkennung und
     fortschrittlichen Indikatoren für präzisere Handelsignale.
+    Cross-Timeframe-Analyse und verbesserte Detektierung mehrfacher Testlevels.
     
     Args:
         data (pandas.DataFrame): OHLC data

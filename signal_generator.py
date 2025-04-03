@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 from data_handler import get_forex_data, calculate_indicators, get_market_sentiment
 from performance_tracker import update_performance
+import news_scraper  # Importiere das neue News-Scraper-Modul für Echtzeit-Marktinformationen
 
 def generate_signals(available_pairs, max_signals=5):
     """
@@ -33,8 +34,19 @@ def generate_signals(available_pairs, max_signals=5):
         # Get market sentiment
         sentiment = get_market_sentiment(pair)
         
-        # Generate signal based on analysis
-        signal = analyze_market(pair, data_with_indicators, sentiment)
+        # Hole Forex-Factory-Daten (Nachrichten und Wirtschaftskalender)
+        forex_factory_data = news_scraper.get_forex_factory_data(pair)
+        
+        # Erweitere Sentiment mit den Forex-Factory-Daten
+        enhanced_sentiment = sentiment.copy()
+        enhanced_sentiment.update({
+            'news_sentiment': forex_factory_data['news_sentiment'],
+            'calendar_impact': forex_factory_data['calendar_impact'],
+            'forex_factory_data': forex_factory_data  # Vollständige Daten für detaillierte Analyse
+        })
+        
+        # Generate signal based on analysis with enhanced data
+        signal = analyze_market(pair, data_with_indicators, enhanced_sentiment)
         
         if signal:
             # Add some randomness to the signal timing to create variety
@@ -317,6 +329,38 @@ def analyze_market(pair, data, sentiment):
             signal_components['sentiment'] = 2
         elif bull_probability > 0.6:
             signal_components['sentiment'] = 1
+            
+        # 8. News und Wirtschaftskalender-Analyse von ForexFactory
+        if 'news_sentiment' in sentiment and 'calendar_impact' in sentiment:
+            try:
+                # Verarbeite Nachrichtenstimmung
+                news_sentiment = sentiment['news_sentiment']
+                news_value = news_sentiment.get('value', 0)  # Wert zwischen -1 und 1
+                news_strength = news_sentiment.get('strength', 0)  # Stärke zwischen 0 und 1
+                
+                # Konvertiere Nachrichtenstimmung in ein Handelssignal
+                if abs(news_value) > 0.3 and news_strength > 0.4:  # Signifikante Nachrichtenstimmung
+                    if news_value > 0:  # Bullische Nachrichtenstimmung
+                        signal_components['news_impact'] = min(2, news_value * 2.5)  # Skalieren auf unsere -2 bis 2 Skala
+                    else:  # Bearische Nachrichtenstimmung
+                        signal_components['news_impact'] = max(-2, news_value * 2.5)
+                
+                # Verarbeite Wirtschaftskalender-Einfluss
+                calendar_impact = sentiment['calendar_impact']
+                impact_value = calendar_impact.get('value', 0)  # Wert zwischen -1 und 1
+                has_high_impact = calendar_impact.get('has_high_impact_events', False)
+                
+                # Wichtige bevorstehende Ereignisse haben einen stärkeren Einfluss
+                if abs(impact_value) > 0.2:  # Signifikante Auswirkung
+                    base_impact = impact_value * 2  # Skalieren auf unsere -2 bis 2 Skala
+                    
+                    # Verstärke den Einfluss, wenn es sich um hochrangige Ereignisse handelt
+                    if has_high_impact:
+                        base_impact *= 1.5
+                    
+                    signal_components['economic_factors'] = max(-2, min(2, base_impact))  # Begrenze auf -2 bis 2
+            except Exception as e:
+                print(f"Fehler bei der Analyse von Nachrichten und Wirtschaftskalender: {e}")
         elif bear_probability > 0.7:  # Very bearish sentiment
             signal_components['sentiment'] = -2
         elif bear_probability > 0.6:
@@ -605,21 +649,53 @@ def analyze_market(pair, data, sentiment):
                 
             take_profit = current_price - (risk * reward_ratio)
         
-        # Estimate trade duration
-        # Based on volatility, pair, and price targets
+        # Estimate trade duration mit verbesserter Genauigkeit und Berücksichtigung externer Faktoren
+        # Based on volatility, pair, price targets, and economic events
         try:
             volatility_factor = sentiment.get('volatility', 0.3)  # Standardwert falls nicht verfügbar
             
             # Calculate approximate pips to target
-            pips_to_target = abs(take_profit - current_price) * 10000  # Convert to pips
+            pips_to_target = abs(take_profit - current_price) * (100 if 'JPY' in pair else 10000)  # Convert to pips
             
-            # Base duration on volatility and distance
-            if 'JPY' in pair:  # JPY pairs move differently
-                pips_to_target = pips_to_target / 100  # Adjust for JPY denomination
+            # Variablen für die Schätzung der Handelsdauer
+            has_upcoming_events = False
+            event_timeframe = 0  # Stunden bis zum nächsten wichtigen Ereignis
+            
+            # Prüfe auf bevorstehende Wirtschaftsereignisse
+            if 'forex_factory_data' in sentiment:
+                calendar_data = sentiment['forex_factory_data'].get('calendar_events', [])
                 
+                # Finde das nächste relevante Ereignis
+                current_time = datetime.now()
+                relevant_events = []
+                
+                for event in calendar_data:
+                    if 'datetime' in event and 'impact' in event and event['impact'] >= 2:
+                        event_time = event['datetime']
+                        if isinstance(event_time, datetime) and event_time > current_time:
+                            time_diff = (event_time - current_time).total_seconds() / 3600  # Stunden
+                            relevant_events.append((event, time_diff))
+                
+                # Sortiere nach Zeit (nächstes Ereignis zuerst)
+                if relevant_events:  # Nur sortieren, wenn die Liste nicht leer ist
+                    relevant_events.sort(key=lambda x: x[1])
+                    
+                    if relevant_events:
+                        has_upcoming_events = True
+                        event_timeframe = relevant_events[0][1]  # Stunden bis zum nächsten Ereignis
+            
+            # ADX für Trendstärke verwenden, wenn verfügbar
+            trend_strength_factor = 1.0  # Default
+            if 'ADX' in data.iloc[-1].index:
+                adx_value = data.iloc[-1]['ADX']
+                if isinstance(adx_value, (int, float)) and not np.isnan(adx_value):
+                    if adx_value > 30:  # Starker Trend
+                        trend_strength_factor = 0.7  # Schnellere Bewegung in starken Trends
+                    elif adx_value < 20:  # Schwacher Trend
+                        trend_strength_factor = 1.3  # Langsamere Bewegung in Range-Märkten
+            
             # Prüfen auf gültige Werte und Vermeidung von Division durch Null
-            denominator = 5 + volatility_factor * 20
-            if denominator <= 0 or not isinstance(pips_to_target, (int, float)) or np.isnan(pips_to_target):
+            if not isinstance(pips_to_target, (int, float)) or np.isnan(pips_to_target):
                 # Fallback für ungültige Berechnungswerte
                 trade_duration = "~2-3 Tage (geschätzt)"
             else:
