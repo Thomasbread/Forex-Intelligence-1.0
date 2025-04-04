@@ -404,7 +404,7 @@ if page == "Trading Signals":
                     <div class="trade-info-box">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                             <span class="price-label">Einstiegspunkt:</span>
-                            <span class="price-value entry-price">{entry_price:.5f}</span>
+                            <span class="price-value entry-price">{entry_price:.5f if pd.notna(entry_price) else 'Nicht verfügbar'}</span>
                         </div>
                         
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
