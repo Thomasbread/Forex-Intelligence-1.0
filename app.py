@@ -341,105 +341,18 @@ if page == "Trading Signals":
                     st.markdown(f"### {header_text}")
                     
                     # Signal details
-                    # Convert Series values to Python scalar values if needed
-                    entry_price = signal['entry_price'].item() if hasattr(signal['entry_price'], 'item') else signal['entry_price']
-                    stop_loss = signal['stop_loss'].item() if hasattr(signal['stop_loss'], 'item') else signal['stop_loss']
-                    take_profit = signal['take_profit'].item() if hasattr(signal['take_profit'], 'item') else signal['take_profit']
-                    risk_reward = signal['risk_reward_ratio'].item() if hasattr(signal['risk_reward_ratio'], 'item') else signal['risk_reward_ratio']
                     timestamp = signal['timestamp']
                     
-                    # Get entry timing and estimated duration (handle both new and old signal formats)
-                    entry_timing = signal.get('entry_timing', 'Sofort')
-                    estimated_duration = signal.get('estimated_duration', 'Nicht verfügbar')
-                    
-                    # Berechnung der Pips für SL und TP (genauer anzeigen)
-                    sl_pips = abs(entry_price - stop_loss) * (100 if 'JPY' in signal['pair'] else 10000)
-                    tp_pips = abs(take_profit - entry_price) * (100 if 'JPY' in signal['pair'] else 10000)
-                    
-                    # Berechnung der Prozentwerte
-                    sl_percent = abs(entry_price - stop_loss) / entry_price * 100
-                    tp_percent = abs(take_profit - entry_price) / entry_price * 100
-                    
-                    # Erstelle einen auffälligeren Trade-Info-Box mit mehr Details
-                    st.markdown("""
-                    <style>
-                    .trade-info-box {
-                        background: linear-gradient(135deg, rgba(26, 44, 66, 0.8), rgba(15, 28, 46, 0.95));
-                        border-left: 4px solid #00c7b7;
-                        padding: 15px;
-                        border-radius: 8px;
-                        margin-bottom: 20px;
-                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                    }
-                    .price-value {
-                        font-weight: bold;
-                        font-family: monospace;
-                        font-size: 1.1em;
-                        color: #ffffff;
-                        padding: 2px 6px;
-                        border-radius: 4px;
-                        background-color: rgba(0, 0, 0, 0.2);
-                    }
-                    .entry-price {
-                        color: #ffcc00;
-                    }
-                    .sl-price {
-                        color: #ef4056;
-                    }
-                    .tp-price {
-                        color: #00c7b7;
-                    }
-                    .price-label {
-                        font-weight: bold;
-                        color: rgba(255,255,255,0.8);
-                    }
-                    .price-metrics {
-                        font-size: 0.9em;
-                        color: rgba(255,255,255,0.6);
-                    }
-                    </style>
-                    """, unsafe_allow_html=True)
-                    
+                    # Simplified trade info box with just timestamp
                     st.markdown(f"""
-                    <div class="trade-info-box">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                            <span class="price-label">Einstiegspunkt</span>
-                            <span class="price-value entry-price">{f'{entry_price:.5f}' if pd.notna(entry_price) else 'Nicht verfügbar'}</span>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                            <span class="price-label">Stop Loss</span>
-                            <span class="price-value sl-price">{stop_loss:.5f}</span>
-                        </div>
-                        <div class="price-metrics">
-                            <span style="color: rgba(239, 64, 86, 0.7);">Risiko: {sl_pips:.1f} Pips ({sl_percent:.2f}%)</span>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; margin-top: 12px; margin-bottom: 12px;">
-                            <span class="price-label">Take Profit</span>
-                            <span class="price-value tp-price">{take_profit:.5f}</span>
-                        </div>
-                        <div class="price-metrics">
-                            <span style="color: rgba(0, 199, 183, 0.7);">Gewinn: {tp_pips:.1f} Pips ({tp_percent:.2f}%)</span>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                            <span class="price-label">Risiko/Gewinn Verhältnis:</span>
-                            <span class="price-value">1:{risk_reward:.1f}</span>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                            <span class="price-label">Optimale Eintrittszeit:</span>
-                            <span>{entry_timing}</span>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                            <span class="price-label">Geschätzte Tradedauer:</span>
-                            <span>{estimated_duration}</span>
-                        </div>
-                        
+                    <div style="background: linear-gradient(135deg, rgba(26, 44, 66, 0.8), rgba(15, 28, 46, 0.95));
+                                border-left: 4px solid #00c7b7;
+                                padding: 15px;
+                                border-radius: 8px;
+                                margin-bottom: 20px;
+                                box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
                         <div style="display: flex; justify-content: space-between;">
-                            <span class="price-label">Zeitstempel:</span>
+                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Zeitstempel:</span>
                             <span>{timestamp}</span>
                         </div>
                     </div>
