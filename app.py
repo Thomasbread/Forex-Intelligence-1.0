@@ -366,9 +366,7 @@ if page == "Trading Signals":
                     with st.expander("Analyse anzeigen"):
                         st.write(signal['analysis'])
                     
-                    # Disclaimer for each signal
-                    if i == 0:  # Show disclaimer only for the first (most recent) signal
-                        st.info("⚠️ Hinweis: Dies ist keine professionelle Finanzberatung, sondern basiert auf KI-Analysen.")
+                    # Entfernt: Kein Disclaimer mehr unterhalb jedes Signals
                 
                 with cols[1]:
                     # Get price chart for the pair
@@ -473,7 +471,7 @@ if page == "Trading Signals":
                             font=dict(size=25, color="rgba(255, 255, 255, 0.05)"),
                             align="center",
                             opacity=0.6,
-                            texttextangle=30
+                            textangle=30
                         )
                         
                         # Plaziere den Chart mit einem einzigartigen Key für jedes Signal

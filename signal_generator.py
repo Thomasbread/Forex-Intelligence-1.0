@@ -650,7 +650,7 @@ def analyze_market(pair, data, sentiment):
             take_profit = current_price - (risk * reward_ratio)
         
         # Estimate trade duration mit verbesserter Genauigkeit und Berücksichtigung externer Faktoren
-        # Based on volatility, pair, price targets, and economic events
+        # Verkürzte Handelsdauer auf 1-4 Stunden gemäß Kundenvorgabe
         try:
             volatility_factor = sentiment.get('volatility', 0.3)  # Standardwert falls nicht verfügbar
             
@@ -674,7 +674,9 @@ def analyze_market(pair, data, sentiment):
                         event_time = event['datetime']
                         if isinstance(event_time, datetime) and event_time > current_time:
                             time_diff = (event_time - current_time).total_seconds() / 3600  # Stunden
-                            relevant_events.append((event, time_diff))
+                            # Nur Ereignisse in den nächsten 4 Stunden berücksichtigen
+                            if time_diff <= 4:
+                                relevant_events.append((event, time_diff))
                 
                 # Sortiere nach Zeit (nächstes Ereignis zuerst)
                 if relevant_events:  # Nur sortieren, wenn die Liste nicht leer ist
@@ -696,32 +698,30 @@ def analyze_market(pair, data, sentiment):
             
             # Prüfen auf gültige Werte und Vermeidung von Division durch Null
             if not isinstance(pips_to_target, (int, float)) or np.isnan(pips_to_target):
-                # Fallback für ungültige Berechnungswerte
-                trade_duration = "~2-3 Tage (geschätzt)"
+                # Fallback für ungültige Berechnungswerte - Beschränkt auf 1-4 Stunden
+                trade_duration = "1-3 Stunden"
             else:
-                # Estimated hours based on volatility and distance
-                est_hours = pips_to_target / denominator
+                # Beschränke die Handelsdauer auf 1-4 Stunden gemäß Kundenvorgabe
                 
-                # Überprüfung auf NaN und ungültige Werte
-                if np.isnan(est_hours) or not np.isfinite(est_hours):
-                    trade_duration = "~2-3 Tage (geschätzt)"
+                # Beschränke die Handelsdauer auf 1-4 Stunden gemäß Kundenvorgabe
+                # Volatilität und Trendstärke beeinflussen die Dauer innerhalb des Rahmens
+                
+                if volatility_factor > 0.7 and trend_strength_factor < 1.0:
+                    # Hohe Volatilität und starker Trend = schnellere Bewegung
+                    trade_duration = "1-2 Stunden"
+                elif volatility_factor < 0.3 or trend_strength_factor > 1.2:
+                    # Niedrige Volatilität oder schwacher Trend = langsamere Bewegung
+                    trade_duration = "3-4 Stunden"
                 else:
-                    # Convert to a human-readable format
-                    if est_hours < 24:
-                        # Stelle sicher, dass der Wert mindestens 1 ist
-                        hours_rounded = max(1, int(est_hours))
-                        trade_duration = f"~{hours_rounded} Stunden"
-                    else:
-                        est_days = est_hours / 24
-                        # Stelle sicher, dass der Wert mindestens 1 ist
-                        days_rounded = max(1, int(est_days))
-                        trade_duration = f"~{days_rounded} Tage"
+                    # Normale Bedingungen
+                    trade_duration = "2-3 Stunden"
                     
-                    # Add variability based on market conditions
-                    if volatility_factor < 0.3:  # Low volatility
-                        trade_duration += " (bei niedriger Volatilität evtl. länger)"
-                    elif volatility_factor > 0.7:  # High volatility
-                        trade_duration += " (bei hoher Volatilität evtl. kürzer)"
+                # Wenn ein wichtiges Ereignis in den nächsten 4 Stunden ansteht
+                if has_upcoming_events and event_timeframe < 4:
+                    if event_timeframe < 1:
+                        trade_duration = "Nur sehr kurzfristig (< 1 Stunde)"
+                    else:
+                        trade_duration = f"Maximal {int(event_timeframe)} Stunde(n)"
         except Exception as e:
             # Fallback bei Ausnahmen
             print(f"Fehler bei der Berechnung der Handelsdauer: {e}")
@@ -755,13 +755,25 @@ def analyze_market(pair, data, sentiment):
         # Define direction_text for our analysis template
         direction_text = "bullisch" if action == "buy" else "bearisch"
         
+        # Füge Konfidenz-Label basierend auf der Signalqualität hinzu
+        confidence_label = ""
+        if confidence == 'sicher':
+            confidence_label = "🟢 SICHER"
+        elif confidence == 'mittel':
+            confidence_label = "🟡 MITTEL" 
+        else:
+            confidence_label = "🔴 UNSICHER"
+            
         # Create enhanced analysis with additional details
-        analysis = f"""**{pair} {direction_text.upper()} SIGNAL - HOHE KONFIDENZ**
+        analysis = f"""**{pair} {direction_text.upper()} SIGNAL - {confidence_label}**
 
 {base_analysis}
 
 **Optimale Eintrittszeit:** {entry_timing}
 **Geschätzte Tradedauer:** {trade_duration}
+**Stop-Loss:** {stop_loss:.5f} (basierend auf Support/Resistance)
+**Take-Profit:** {take_profit:.5f} (basierend auf Support/Resistance)
+**Verhältnis Risiko/Belohnung:** 1:{reward_ratio:.1f}
 
 **Risikofaktoren zu beachten:**
 • Unerwartete wirtschaftliche Ereignisse oder Nachrichten könnten die Preisentwicklung beeinflussen.
