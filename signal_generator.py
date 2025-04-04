@@ -763,22 +763,6 @@ def analyze_market(pair, data, sentiment):
             confidence_label = "🟡 MITTEL" 
         else:
             confidence_label = "🔴 UNSICHER"
-        
-        # Stelle sicher, dass alle Werte definiert sind, bevor wir NaN überprüfen
-        # Definiere Standardwerte zuerst
-        current_price = data['Close'].iloc[-1]
-        entry_price = current_price
-        
-        # Standardwerte für stop_loss basierend auf aktuellen Preisen
-        default_stop_loss = current_price * 0.99 if action == 'buy' else current_price * 1.01
-        stop_loss = default_stop_loss
-        
-        # Standardwerte für reward_ratio und take_profit
-        if pd.isna(reward_ratio) or reward_ratio is None:
-            reward_ratio = 3.0  # Standard-Wert
-            
-        default_take_profit = current_price * (1 + (0.01 * reward_ratio)) if action == 'buy' else current_price * (1 - (0.01 * reward_ratio))
-        take_profit = default_take_profit
             
         # Create enhanced analysis with additional details
         analysis = f"""**{pair} {direction_text.upper()} SIGNAL - {confidence_label}**
@@ -796,14 +780,14 @@ def analyze_market(pair, data, sentiment):
 • Hohe Volatilität könnte zu Kursausbrüchen führen.
 """
         
-        # Create enhanced signal with new fields - stellen Sie sicher, dass alle Werte gültig sind
+        # Create enhanced signal with new fields
         return {
             'pair': pair,
             'action': action,
-            'entry_price': float(entry_price),  # Explizite Konvertierung zu Float
-            'stop_loss': float(stop_loss),      # Explizite Konvertierung zu Float
-            'take_profit': float(take_profit),  # Explizite Konvertierung zu Float
-            'risk_reward_ratio': float(reward_ratio),  # Explizite Konvertierung zu Float
+            'entry_price': current_price,
+            'stop_loss': stop_loss,
+            'take_profit': take_profit,
+            'risk_reward_ratio': reward_ratio,  # Dynamisches Risk-Reward-Verhältnis basierend auf Signalstärke
             'confidence': confidence,
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             'entry_timing': entry_timing,

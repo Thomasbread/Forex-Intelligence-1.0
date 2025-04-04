@@ -388,19 +388,9 @@ if page == "Trading Signals":
                         )])
                         
                         # Add entry, SL and TP lines mit besseren Farben und Beschriftungen
-                        # Stellt sicher, dass keine NaN-Werte vorhanden sind
                         entry_price = signal['entry_price'].item() if hasattr(signal['entry_price'], 'item') else signal['entry_price']
                         stop_loss = signal['stop_loss'].item() if hasattr(signal['stop_loss'], 'item') else signal['stop_loss']
                         take_profit = signal['take_profit'].item() if hasattr(signal['take_profit'], 'item') else signal['take_profit']
-                        
-                        # Überprüfen und Ersetzen von NaN-Werten
-                        if pd.isna(entry_price):
-                            entry_price = pair_data['Close'].iloc[-1]
-                        if pd.isna(stop_loss):
-                            stop_loss = entry_price * 0.99 if signal['action'] == 'buy' else entry_price * 1.01
-                        if pd.isna(take_profit):
-                            risk = abs(entry_price - stop_loss)
-                            take_profit = entry_price + (risk * 3) if signal['action'] == 'buy' else entry_price - (risk * 3)
                         
                         # Berechne möglichen Gewinn und Verlust
                         risk_pips = abs(entry_price - stop_loss)
