@@ -764,21 +764,21 @@ def analyze_market(pair, data, sentiment):
         else:
             confidence_label = "🔴 UNSICHER"
         
-        # Stelle sicher, dass keine NaN-Werte existieren
-        # Standardwerte setzen, falls erforderlich
-        if pd.isna(entry_price) or entry_price is None:
-            entry_price = data['Close'].iloc[-1]
-            
-        if pd.isna(stop_loss) or stop_loss is None:
-            # Fallback-Stop-Loss: 1% unter/über dem Einstiegspreis
-            stop_loss = entry_price * 0.99 if action == 'buy' else entry_price * 1.01
-            
-        if pd.isna(take_profit) or take_profit is None:
-            # Fallback-Take-Profit: Reward-Ratio anwenden
-            take_profit = entry_price * (1 + (0.01 * reward_ratio)) if action == 'buy' else entry_price * (1 - (0.01 * reward_ratio))
-            
+        # Stelle sicher, dass alle Werte definiert sind, bevor wir NaN überprüfen
+        # Definiere Standardwerte zuerst
+        current_price = data['Close'].iloc[-1]
+        entry_price = current_price
+        
+        # Standardwerte für stop_loss basierend auf aktuellen Preisen
+        default_stop_loss = current_price * 0.99 if action == 'buy' else current_price * 1.01
+        stop_loss = default_stop_loss
+        
+        # Standardwerte für reward_ratio und take_profit
         if pd.isna(reward_ratio) or reward_ratio is None:
             reward_ratio = 3.0  # Standard-Wert
+            
+        default_take_profit = current_price * (1 + (0.01 * reward_ratio)) if action == 'buy' else current_price * (1 - (0.01 * reward_ratio))
+        take_profit = default_take_profit
             
         # Create enhanced analysis with additional details
         analysis = f"""**{pair} {direction_text.upper()} SIGNAL - {confidence_label}**
