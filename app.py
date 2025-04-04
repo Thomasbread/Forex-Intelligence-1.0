@@ -166,7 +166,7 @@ pages = list(page_icons.keys())
 
 # Erzeuge die Auswahlbox mit Icons
 page_options = [f"{icon} {page}" for page, icon in page_icons.items()]
-selected_page = st.sidebar.selectbox("", page_options, label_visibility="collapsed")
+selected_page = st.sidebar.selectbox("Navigation", page_options, label_visibility="collapsed")
 
 # Extrahiere den Seitennamen ohne Icon
 page = selected_page.split(" ", 1)[1]

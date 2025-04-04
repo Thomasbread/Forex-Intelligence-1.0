@@ -150,7 +150,11 @@ def update_performance(new_signals_df):
                     'close_timestamp': None
                 }
                 
-                performance_df = pd.concat([performance_df, pd.DataFrame([new_row])], ignore_index=True)
+                # Ensure consistent dtypes before concatenation
+    new_df = pd.DataFrame([new_row])
+    if not performance_df.empty:
+        new_df = new_df.astype(performance_df.dtypes)
+    performance_df = pd.concat([performance_df, new_df], ignore_index=True)
     
     # Save updated performance data
     save_performance_data(performance_df)
