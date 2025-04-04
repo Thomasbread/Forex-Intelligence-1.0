@@ -352,15 +352,98 @@ if page == "Trading Signals":
                     entry_timing = signal.get('entry_timing', 'Sofort')
                     estimated_duration = signal.get('estimated_duration', 'Nicht verfügbar')
                     
+                    # Berechnung der Pips für SL und TP (genauer anzeigen)
+                    sl_pips = abs(entry_price - stop_loss) * (100 if 'JPY' in signal['pair'] else 10000)
+                    tp_pips = abs(take_profit - entry_price) * (100 if 'JPY' in signal['pair'] else 10000)
+                    
+                    # Berechnung der Prozentwerte
+                    sl_percent = abs(entry_price - stop_loss) / entry_price * 100
+                    tp_percent = abs(take_profit - entry_price) / entry_price * 100
+                    
+                    # Erstelle einen auffälligeren Trade-Info-Box mit mehr Details
+                    st.markdown("""
+                    <style>
+                    .trade-info-box {
+                        background: linear-gradient(135deg, rgba(26, 44, 66, 0.8), rgba(15, 28, 46, 0.95));
+                        border-left: 4px solid #00c7b7;
+                        padding: 15px;
+                        border-radius: 8px;
+                        margin-bottom: 20px;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                    }
+                    .price-value {
+                        font-weight: bold;
+                        font-family: monospace;
+                        font-size: 1.1em;
+                        color: #ffffff;
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        background-color: rgba(0, 0, 0, 0.2);
+                    }
+                    .entry-price {
+                        color: #ffcc00;
+                    }
+                    .sl-price {
+                        color: #ef4056;
+                    }
+                    .tp-price {
+                        color: #00c7b7;
+                    }
+                    .price-label {
+                        font-weight: bold;
+                        color: rgba(255,255,255,0.8);
+                    }
+                    .price-metrics {
+                        font-size: 0.9em;
+                        color: rgba(255,255,255,0.6);
+                    }
+                    </style>
+                    """, unsafe_allow_html=True)
+                    
                     st.markdown(f"""
-                    **Einstiegspunkt:** {entry_price:.5f}  
-                    **Stop Loss:** {stop_loss:.5f}  
-                    **Take Profit:** {take_profit:.5f}  
-                    **Risiko/Gewinn Verhältnis:** 1:{risk_reward}  
-                    **Optimale Eintrittszeit:** {entry_timing}  
-                    **Geschätzte Tradedauer:** {estimated_duration}  
-                    **Zeitstempel:** {timestamp}
-                    """)
+                    <div class="trade-info-box">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span class="price-label">Einstiegspunkt:</span>
+                            <span class="price-value entry-price">{entry_price:.5f}</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span class="price-label">Stop Loss:</span>
+                            <span class="price-value sl-price">{stop_loss:.5f}</span>
+                        </div>
+                        <div class="price-metrics" style="margin-left: 20px; margin-bottom: 12px;">
+                            ↳ {sl_pips:.1f} Pips | {sl_percent:.2f}% vom Einstiegskurs
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span class="price-label">Take Profit:</span>
+                            <span class="price-value tp-price">{take_profit:.5f}</span>
+                        </div>
+                        <div class="price-metrics" style="margin-left: 20px; margin-bottom: 12px;">
+                            ↳ {tp_pips:.1f} Pips | {tp_percent:.2f}% vom Einstiegskurs
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span class="price-label">Risiko/Gewinn Verhältnis:</span>
+                            <span class="price-value">1:{risk_reward:.1f}</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span class="price-label">Optimale Eintrittszeit:</span>
+                            <span>{entry_timing}</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span class="price-label">Geschätzte Tradedauer:</span>
+                            <span>{estimated_duration}</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="price-label">Zeitstempel:</span>
+                            <span>{timestamp}</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
                     
                     # Signal analysis
                     with st.expander("Analyse anzeigen"):
@@ -399,13 +482,17 @@ if page == "Trading Signals":
                         # Add fancy lines mit Annotationen
                         action_color = "#00c7b7" if signal['action'] == 'buy' else "#ef4056"
                         
+                        # Berechne Pip-Werte für Chart-Anzeige
+                        sl_pips_chart = abs(entry_price - stop_loss) * (100 if 'JPY' in signal['pair'] else 10000)
+                        tp_pips_chart = abs(take_profit - entry_price) * (100 if 'JPY' in signal['pair'] else 10000)
+                        
                         # Entry-Linie
                         fig.add_hline(
                             y=entry_price, 
                             line_dash="solid", 
                             line_color="#ffcc00",  # Gold für Entry
                             line_width=2,
-                            annotation_text="ENTRY",
+                            annotation_text=f"ENTRY {entry_price:.5f}",
                             annotation_position="right",
                             annotation_font_color="#ffcc00",
                             annotation_font_size=14,
@@ -418,7 +505,7 @@ if page == "Trading Signals":
                             line_dash="dash", 
                             line_color="#ef4056",  # Rot für Stop Loss
                             line_width=2,
-                            annotation_text=f"SL ({risk_pips:.1f} pips)",
+                            annotation_text=f"SL {stop_loss:.5f} ({sl_pips_chart:.1f} pips)",
                             annotation_position="right",
                             annotation_font_color="#ef4056",
                             annotation_font_size=14,
@@ -431,7 +518,7 @@ if page == "Trading Signals":
                             line_dash="dash", 
                             line_color="#00c7b7",  # Türkis für Take Profit
                             line_width=2,
-                            annotation_text=f"TP ({reward_pips:.1f} pips)",
+                            annotation_text=f"TP {take_profit:.5f} ({tp_pips_chart:.1f} pips)",
                             annotation_position="right",
                             annotation_font_color="#00c7b7",
                             annotation_font_size=14,
