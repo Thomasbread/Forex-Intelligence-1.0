@@ -403,24 +403,24 @@ if page == "Trading Signals":
                     st.markdown(f"""
                     <div class="trade-info-box">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                            <span class="price-label">Einstiegspunkt:</span>
+                            <span class="price-label">Einstiegspunkt</span>
                             <span class="price-value entry-price">{f'{entry_price:.5f}' if pd.notna(entry_price) else 'Nicht verfügbar'}</span>
                         </div>
                         
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                            <span class="price-label">Stop Loss:</span>
+                            <span class="price-label">Stop Loss</span>
                             <span class="price-value sl-price">{stop_loss:.5f}</span>
                         </div>
-                        <div class="price-metrics" style="margin-left: 20px; margin-bottom: 12px;">
-                            ↳ {sl_pips:.1f} Pips | {sl_percent:.2f}% vom Einstiegskurs
+                        <div class="price-metrics">
+                            <span style="color: rgba(239, 64, 86, 0.7);">Risiko: {sl_pips:.1f} Pips ({sl_percent:.2f}%)</span>
                         </div>
                         
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                            <span class="price-label">Take Profit:</span>
+                        <div style="display: flex; justify-content: space-between; margin-top: 12px; margin-bottom: 12px;">
+                            <span class="price-label">Take Profit</span>
                             <span class="price-value tp-price">{take_profit:.5f}</span>
                         </div>
-                        <div class="price-metrics" style="margin-left: 20px; margin-bottom: 12px;">
-                            ↳ {tp_pips:.1f} Pips | {tp_percent:.2f}% vom Einstiegskurs
+                        <div class="price-metrics">
+                            <span style="color: rgba(0, 199, 183, 0.7);">Gewinn: {tp_pips:.1f} Pips ({tp_percent:.2f}%)</span>
                         </div>
                         
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
