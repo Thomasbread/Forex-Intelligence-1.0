@@ -374,58 +374,26 @@ if page == "Trading Signals":
                     sl_pips = abs(entry_price - stop_loss) * pip_multiplier
                     tp_pips = abs(take_profit - entry_price) * pip_multiplier
 
-                    # Detailed trade info box
+                    # Compact trade info box
                     st.markdown(f"""
-                    <div style="background: linear-gradient(135deg, rgba(26, 44, 66, 0.8), rgba(15, 28, 46, 0.95));
+                    <div style="background: rgba(26, 44, 66, 0.8);
                                 border-left: 4px solid #00c7b7;
-                                padding: 20px;
+                                padding: 15px;
                                 border-radius: 8px;
-                                margin-bottom: 20px;
-                                box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                        <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center;">
-                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Zeitstempel:</span>
-                            <span>{timestamp}</span>
-
-                            <div class="signal-detail">
-                                <span class="signal-label">Konfidenz:</span>
-                                <span class="signal-value">{confidence_label}</span>
-                            </div>
-
-                            <div class="signal-detail">
-                                <span class="signal-label">Entry:</span>
-                                <span class="signal-value">{entry_price:.5f}</span>
-                            </div>
-
-                            <div class="signal-detail">
-                                <span class="signal-label">Stop-Loss:</span>
-                                <span class="signal-value">{stop_loss:.5f} ({sl_pips:.1f} Pips)</span>
-                            </div>
-
-                            <div class="signal-detail">
-                                <span class="signal-label">Take-Profit:</span>
-                                <span class="signal-value">{take_profit:.5f} ({tp_pips:.1f} Pips)</span>
-                            </div>
-
-                            <div class="signal-detail">
-                                <span class="signal-label">Risiko/Belohnung:</span>
-                                <span class="signal-value">1:{risk_reward:.1f}</span>
-                            </div>
-
-                            <div class="signal-detail">
-                                <span class="signal-label">Geschätzte Dauer:</span>
-                                <span class="signal-value">{trade_duration}</span>
-                            </div>
+                                margin-bottom: 10px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 0.95em;">
+                            <div style="color: #00c7b7;">TP: {take_profit:.5f} ({tp_pips:.1f} Pips)</div>
+                            <div style="color: #ffcc00;">Entry: {entry_price:.5f}</div>
+                            <div style="color: #ef4056;">SL: {stop_loss:.5f} ({sl_pips:.1f} Pips)</div>
+                            <div>R/R: 1:{risk_reward:.1f}</div>
+                            <div>{confidence_label}</div>
+                            <div>Dauer: {trade_duration}</div>
                         </div>
-
-                        <div style="margin-top: 20px; padding: 15px; background: rgba(0, 199, 183, 0.1); border-radius: 5px; border-left: 3px solid #00c7b7;">
-                            <p style="margin: 0; color: #f1f1f1; font-size: 0.9em;">
-                                <strong>💡 Trading-Tipp:</strong> Wenn du erfolgreich traden willst, nutze maximal 1–2 % deines Kapitals pro Trade 
-                                und strebe ein Chance-Risiko-Verhältnis von mindestens 1.5:1 an – so gewinnst du langfristig auch bei einzelnen Verlusten. 
-                                Nutze Leverage nur vorsichtig (2–5x) und nur dann, wenn du deinen Stop-Loss klar definiert hast. 
-                                Der Schlüssel zum Erfolg ist Disziplin, nicht Größe – kleine, kontrollierte Schritte schlagen wilde Wetten.
-                            </p>
+                        <div style="margin-top: 10px; font-size: 0.8em; color: #f1f1f1;">
+                            💡 Max. 1-2% Risiko pro Trade | Leverage 2-5x | Stop-Loss ist Pflicht
                         </div>
                     </div>
+                    """, unsafe_allow_html=True)
                     """, unsafe_allow_html=True)
 
                     # Signal analysis
