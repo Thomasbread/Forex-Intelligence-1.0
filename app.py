@@ -338,10 +338,6 @@ if page == "Trading Signals":
                         st.session_state.viewed_signals.add(signal_id)
 
                     st.markdown(f"### {header_text}")
-                    
-                    # Success probability
-                    prob_color = "green" if signal['success_probability'] >= 85 else "orange" if signal['success_probability'] >= 75 else "red"
-                    st.markdown(f"**Erfolgswahrscheinlichkeit:** <span style='color: {prob_color}'>{signal['success_probability']:.1f}%</span>", unsafe_allow_html=True)
 
                     # Signal details
                     timestamp = signal['timestamp']
