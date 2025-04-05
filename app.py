@@ -341,18 +341,60 @@ if page == "Trading Signals":
 
                     # Signal details
                     timestamp = signal['timestamp']
+                    entry_price = signal['entry_price']
+                    stop_loss = signal['stop_loss']
+                    take_profit = signal['take_profit']
+                    risk_reward = signal['risk_reward_ratio']
+                    trade_duration = signal.get('estimated_duration', 'Nicht verfügbar')
+                    confidence_label = {
+                        'sicher': "🟢 Hohe Konfidenz",
+                        'mittel': "🟡 Mittlere Konfidenz",
+                        'unsicher': "🔴 Niedrige Konfidenz"
+                    }[signal['confidence']]
 
-                    # Simplified trade info box with just timestamp
+                    # Calculate pips for SL and TP
+                    pip_multiplier = 100 if 'JPY' in signal['pair'] else 10000
+                    sl_pips = abs(entry_price - stop_loss) * pip_multiplier
+                    tp_pips = abs(take_profit - entry_price) * pip_multiplier
+
+                    # Detailed trade info box
                     st.markdown(f"""
                     <div style="background: linear-gradient(135deg, rgba(26, 44, 66, 0.8), rgba(15, 28, 46, 0.95));
                                 border-left: 4px solid #00c7b7;
-                                padding: 15px;
+                                padding: 20px;
                                 border-radius: 8px;
                                 margin-bottom: 20px;
                                 box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                        <div style="display: flex; justify-content: space-between;">
+                        <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center;">
                             <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Zeitstempel:</span>
                             <span>{timestamp}</span>
+                            
+                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Konfidenz:</span>
+                            <span>{confidence_label}</span>
+                            
+                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Entry:</span>
+                            <span>{entry_price:.5f}</span>
+                            
+                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Stop-Loss:</span>
+                            <span>{stop_loss:.5f} ({sl_pips:.1f} Pips)</span>
+                            
+                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Take-Profit:</span>
+                            <span>{take_profit:.5f} ({tp_pips:.1f} Pips)</span>
+                            
+                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Risiko/Belohnung:</span>
+                            <span>1:{risk_reward:.1f}</span>
+                            
+                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Geschätzte Dauer:</span>
+                            <span>{trade_duration}</span>
+                        </div>
+
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(0, 199, 183, 0.1); border-radius: 5px; border-left: 3px solid #00c7b7;">
+                            <p style="margin: 0; color: #f1f1f1; font-size: 0.9em;">
+                                <strong>💡 Trading-Tipp:</strong> Wenn du erfolgreich traden willst, nutze maximal 1–2 % deines Kapitals pro Trade 
+                                und strebe ein Chance-Risiko-Verhältnis von mindestens 1.5:1 an – so gewinnst du langfristig auch bei einzelnen Verlusten. 
+                                Nutze Leverage nur vorsichtig (2–5x) und nur dann, wenn du deinen Stop-Loss klar definiert hast. 
+                                Der Schlüssel zum Erfolg ist Disziplin, nicht Größe – kleine, kontrollierte Schritte schlagen wilde Wetten.
+                            </p>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
