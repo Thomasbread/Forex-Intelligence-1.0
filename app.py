@@ -126,6 +126,23 @@ st.markdown("""
     .new-signal {
         animation: newSignalGlow 2s infinite;
     }
+
+    /* Styles for signal details */
+    .signal-detail {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .signal-label {
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.8);
+        width: 120px; /* Fixed width for labels */
+    }
+
+    .signal-value {
+        color: #00c7b7; /* Highlight values */
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -368,24 +385,36 @@ if page == "Trading Signals":
                         <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center;">
                             <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Zeitstempel:</span>
                             <span>{timestamp}</span>
-                            
-                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Konfidenz:</span>
-                            <span>{confidence_label}</span>
-                            
-                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Entry:</span>
-                            <span>{entry_price:.5f}</span>
-                            
-                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Stop-Loss:</span>
-                            <span>{stop_loss:.5f} ({sl_pips:.1f} Pips)</span>
-                            
-                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Take-Profit:</span>
-                            <span>{take_profit:.5f} ({tp_pips:.1f} Pips)</span>
-                            
-                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Risiko/Belohnung:</span>
-                            <span>1:{risk_reward:.1f}</span>
-                            
-                            <span style="font-weight: bold; color: rgba(255,255,255,0.8);">Geschätzte Dauer:</span>
-                            <span>{trade_duration}</span>
+
+                            <div class="signal-detail">
+                                <span class="signal-label">Konfidenz:</span>
+                                <span class="signal-value">{confidence_label}</span>
+                            </div>
+
+                            <div class="signal-detail">
+                                <span class="signal-label">Entry:</span>
+                                <span class="signal-value">{entry_price:.5f}</span>
+                            </div>
+
+                            <div class="signal-detail">
+                                <span class="signal-label">Stop-Loss:</span>
+                                <span class="signal-value">{stop_loss:.5f} ({sl_pips:.1f} Pips)</span>
+                            </div>
+
+                            <div class="signal-detail">
+                                <span class="signal-label">Take-Profit:</span>
+                                <span class="signal-value">{take_profit:.5f} ({tp_pips:.1f} Pips)</span>
+                            </div>
+
+                            <div class="signal-detail">
+                                <span class="signal-label">Risiko/Belohnung:</span>
+                                <span class="signal-value">1:{risk_reward:.1f}</span>
+                            </div>
+
+                            <div class="signal-detail">
+                                <span class="signal-label">Geschätzte Dauer:</span>
+                                <span class="signal-value">{trade_duration}</span>
+                            </div>
                         </div>
 
                         <div style="margin-top: 20px; padding: 15px; background: rgba(0, 199, 183, 0.1); border-radius: 5px; border-left: 3px solid #00c7b7;">
