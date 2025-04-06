@@ -18,6 +18,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Port Konfiguration
+import os
+os.environ['STREAMLIT_SERVER_PORT'] = '5000'
+os.environ['STREAMLIT_SERVER_ADDRESS'] = '0.0.0.0'
+
 # Custom CSS für ein epischeres Erscheinungsbild
 st.markdown("""
 <style>
