@@ -1,7 +1,11 @@
-
 [server]
-port = 5000
-address = "0.0.0.0"
 headless = true
-enableCORS = false
-enableXsrfProtection = false
+address = "0.0.0.0"
+port = 5000
+
+[theme]
+# Professionelles dunkleres Farbschema für eine epischere Trading-Ansicht
+primaryColor = "#00c7b7"        # Türkis für Hauptaktionen und Hervorhebungen
+backgroundColor = "#0f1c2e"     # Dunkelblau als Haupthintergrund
+secondaryBackgroundColor = "#1a2c42"  # Etwas helleres Blau für Kontainer
+textColor = "#f1f1f1"           # Helles Weiß für Text
