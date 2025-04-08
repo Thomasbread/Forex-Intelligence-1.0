@@ -10,6 +10,28 @@ from signal_generator import generate_signals
 from performance_tracker import get_performance_history, update_performance
 from utils import format_percentage, get_confidence_color
 
+st.title("Forex Intelligence Dashboard")
+
+currency_pair = st.sidebar.selectbox(
+    "Währungspaar auswählen",
+    ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD"]
+)
+
+try:
+    st.write("Fetching forex data...")
+    data = fetch_forex_data(currency_pair)
+    st.write("Fetching economic indicators...")
+    indicators = fetch_economic_indicators()
+    st.write("Generating signals...")
+    signals = generate_signals(data)
+    st.write("Scraping news...")
+    news = scrape_forex_news()
+    st.write("Calculating performance...")
+    performance = calculate_performance(signals)
+except Exception as e:
+    st.error(f"Fehler beim Starten der App: {str(e)}")
+    raise  # Beende die App, damit der Fehler sichtbar bleibt
+
 # Page configuration
 st.set_page_config(
     page_title="Forex Intelligence",
